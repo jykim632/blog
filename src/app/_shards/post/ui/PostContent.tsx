@@ -1,6 +1,6 @@
-import type { PostContentType } from "@/app/_entities/post/model";
+
 import { cn } from "@/lib/utils";
 
-export const PostContent = ({ content }: PostContentType) => {
+export const PostContent = ({ content }: {content: string}) => {
   return <div className={cn("leading-8")}>{content}</div>;
 };

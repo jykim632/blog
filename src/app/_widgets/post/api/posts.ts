@@ -1,6 +1,6 @@
 "use server";
 
-import { PostResultType, PostType } from "@/app/_entities/d1/model/post";
+import { PostType, ResponsePostType } from "@/app/_entities/post/model";
 import { queryAPIURL } from "@/app/api/data/cloudflare";
 import { postAPI } from "@/lib/fetcher";
 
@@ -17,7 +17,7 @@ export const getPosts = async () => {
   `;
 
   try {
-    const {success, errors, result} = await postAPI<PostResultType>(queryAPIURL, {
+    const {success, errors, result} = await postAPI<ResponsePostType>(queryAPIURL, {
       sql: query
     });
     if(success){
@@ -45,7 +45,7 @@ export const getPost = async (id: number) => {
   console.log(query);
 
   try {
-    const {success, errors, result} = await postAPI<PostResultType>(queryAPIURL, {
+    const {success, errors, result} = await postAPI<ResponsePostType>(queryAPIURL, {
       sql: query
     });
     if(success){

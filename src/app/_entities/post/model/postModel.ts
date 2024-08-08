@@ -1,21 +1,29 @@
 import { z } from "zod";
+import { getResponseSchema } from "../../d1/model/d1Model";
 
-const PostDataSchema = z.object({
+const postSchema = z.object({
+  id: z.number(),
   title: z.string(),
   content: z.string(),
-  created_at: z.string().datetime({ offset: true }).optional(),
-  updated_at: z.string().datetime({ offset: true }).optional(),
+  tags: z.string(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+  deleted_at: z.string().datetime(),
 });
 
-const PostPageSchema = z.object({
-  data: PostDataSchema,
+const apiPostSchema = postSchema.pick({
+  id: true,
+  title: true,
+  content: true,
+  tags: true,
+  updated_at: true
 });
 
-const PostTitleSchema = PostDataSchema.pick({ title: true, updated_at: true });
-const PostContentSchema = PostDataSchema.pick({ content: true });
-
-const PostCardSchema = PostDataSchema.omit({ updated_at: true });
-
+const PostCardSchema = postSchema.pick({
+  title:true,
+  content:true,
+  updated_at:true,
+})
 
 export const postParamsSchema = z.object({
   title: z.string(),
@@ -25,9 +33,12 @@ export const postParamsSchema = z.object({
   offset: z.number().default(10),
 });
 
-export type PostParamsType = z.infer<typeof postParamsSchema>;
+export const responsePostApiSchema = getResponseSchema(apiPostSchema);
 
-export type PostTitleType = z.infer<typeof PostTitleSchema>;
-export type PostContentType = z.infer<typeof PostContentSchema>;
-export type PostPageType = z.infer<typeof PostPageSchema>;
-export type PostCardPropType = z.infer<typeof PostCardSchema>;
+
+export type PostParamsType = z.infer<typeof postParamsSchema>;
+export type PostType = z.infer<typeof apiPostSchema>;
+export type ResponsePostType = z.infer<typeof responsePostApiSchema>;
+
+// ui component
+export type PostCardProps = z.infer<typeof PostCardSchema>;
