@@ -29,8 +29,8 @@ export const PostCard = ({ title, content, updated_at }: PostCardProps) => {
       </CardHeader>
       <CardContent
         className={cn("overflow-hidden", "whitespace-nowrap", "text-ellipsis")}
+        dangerouslySetInnerHTML={{__html: `${content.substring(0, 70)}...`}}
       >
-        {content.substring(0, 70)}
       </CardContent>
     </Card>
   );

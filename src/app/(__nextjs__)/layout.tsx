@@ -12,7 +12,7 @@ const fontSans = FontSans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "JY Blog",
-  description: "my blog",
+  description: "저를 소개합니다.",
 };
 
 export default function RootLayout({
