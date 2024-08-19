@@ -1,6 +1,7 @@
 export type {
-  PostTitleType,
-  PostContentType,
-  PostPageType,
-  PostCardPropType,
+  PostCardProps,
+  PostType,
+  postParamsSchema,
+  PostParamsType,
+  ResponsePostType
 } from "./postModel";

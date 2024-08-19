@@ -1,9 +1,7 @@
 import dayjs from "dayjs";
-
-import { PostTitleType } from "@/app/_entities/post/model";
 import { cn } from "@/lib/utils";
 
-export const PostTitle = ({ title, updated_at }: PostTitleType) => {
+export const PostTitle = ({ title, updated_at }: {title: string, updated_at: string}) => {
   const dateObj = dayjs(updated_at);
 
   return (

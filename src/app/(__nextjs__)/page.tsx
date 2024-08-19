@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { PostListWidget } from "../widgets/post/ui";
+import { PostListWidget } from "../_widgets/post/ui";
 
 export default function Home() {
   // main page가 생기면..?

@@ -1,4 +1,4 @@
-import { PostCardPropType } from "@/app/_entities/post/model";
+import { PostCardProps } from "@/app/_entities/post/model";
 import {
   Card,
   CardContent,
@@ -9,8 +9,8 @@ import {
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 
-export const PostCard = ({ title, content, created_at }: PostCardPropType) => {
-  const dateObj = dayjs(created_at);
+export const PostCard = ({ title, content, updated_at }: PostCardProps) => {
+  const dateObj = dayjs(updated_at);
   const formalDate = dayjs()?.from(dateObj);
   return (
     <Card
@@ -22,15 +22,15 @@ export const PostCard = ({ title, content, created_at }: PostCardPropType) => {
       )}
     >
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className={cn("text-xl")}>{title}</CardTitle>
         <CardDescription title={dateObj.format("YYYY-MM-DD HH:mm:ss")}>
           {formalDate}
         </CardDescription>
       </CardHeader>
       <CardContent
         className={cn("overflow-hidden", "whitespace-nowrap", "text-ellipsis")}
+        dangerouslySetInnerHTML={{__html: `${content.substring(0, 70)}...`}}
       >
-        {content.substring(0, 70)}
       </CardContent>
     </Card>
   );
