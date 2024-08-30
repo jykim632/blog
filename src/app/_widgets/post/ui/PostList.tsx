@@ -1,3 +1,5 @@
+export const revalidate = 30 // revalidate at most every hour
+
 import { PostCard } from "@/app/_shards/post/ui";
 import Link from "next/link";
 import { getPosts } from "../api";
