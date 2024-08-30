@@ -1,4 +1,4 @@
-import { z, ZodObject, ZodRawShape, ZodType } from "zod";
+import { z, ZodType } from "zod";
 
 const baseResultSchema = z.object({
   success: z.boolean(),
@@ -11,23 +11,23 @@ const baseResultSchema = z.object({
     size_after: z.number(),
     rows_read: z.number(),
     rows_written: z.number(),
-  })
+  }),
 });
 
 const responseSchema = z.object({
   success: z.boolean(),
   errors: z.array(z.any()),
-  message: z.array(z.any())
+  message: z.array(z.any()),
 });
 
 const getBaseResultSchema = (item: ZodType) => {
   return baseResultSchema.extend({
-    results: z.array(item)
+    results: z.array(item),
   });
-}
+};
 
 export const getResponseSchema = (item: ZodType) => {
   return responseSchema.extend({
-    result: z.array(getBaseResultSchema(item))
-  })
-}
+    result: z.array(getBaseResultSchema(item)),
+  });
+};

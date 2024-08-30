@@ -16,7 +16,7 @@ const responsePostSchema = postSchema.pick({
   title: true,
   content: true,
   tags: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const postResultSchema = getResponseSchema(responsePostSchema);
