@@ -1,0 +1,30 @@
+---
+import type { PublicPost } from '../../lib/posts/types';
+
+interface Props {
+  post: PublicPost;
+  index: number;
+  headingLevel: 2 | 3;
+  initialVisibleCount?: number;
+  tone?: number;
+}
+
+const { post, index, headingLevel, initialVisibleCount = 15, tone } = Astro.props;
+const publishedAt = new Date(post.publishedAt).toLocaleDateString('ko-KR', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).replace(/\. /g, '.').replace(/\.$/, '');
+---
+
+<article class="post-card" data-post-card data-tags={post.tags.join('|')} hidden={index >= initialVisibleCount}>
+  <a href={`/posts/${post.slug}`}>
+    <div class="post-card-image" data-tone={tone === undefined ? undefined : String(tone)}>
+      {post.coverImageUrl ? <img src={post.coverImageUrl} alt="" loading={index < 4 ? 'eager' : 'lazy'} /> : <span aria-hidden="true">{post.categoryName ?? 'RECORD'}</span>}
+    </div>
+    <div class="post-card-copy">
+      <p><time datetime={post.publishedAt}>{publishedAt}</time></p>
+      {headingLevel === 2 ? <h2>{post.title}</h2> : <h3>{post.title}</h3>}
+    </div>
+  </a>
+</article>

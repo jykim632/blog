@@ -1,0 +1,12 @@
+---
+interface Props {
+  className?: string;
+}
+
+const { className = '' } = Astro.props;
+---
+
+<label class:list={['post-search', className]}>
+  <span aria-hidden="true">⌕</span>
+  <input type="search" placeholder="글 제목 또는 태그 검색" data-search />
+</label>

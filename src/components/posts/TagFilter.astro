@@ -1,0 +1,13 @@
+---
+interface Props {
+  tags: string[];
+  postCount: number;
+}
+
+const { tags, postCount } = Astro.props;
+---
+
+<div class="post-tags" aria-label="글 태그">
+  <button class="is-active" type="button" data-tag-filter="all" aria-pressed="true">전체 <span>{postCount}</span></button>
+  {tags.map((tag) => <button type="button" data-tag-filter={tag} aria-pressed="false">{tag}</button>)}
+</div>

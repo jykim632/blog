@@ -1,6 +1,16 @@
+---
+const isPostsPage = Astro.url.pathname.startsWith('/posts');
+const isAboutPage = Astro.url.pathname === '/about';
+---
+
 <header class="site-header">
-  <a class="wordmark" href="/" aria-label="파랑새들의 둥지 홈">파랑새들의 둥지<span>.</span></a>
+  <a class="wordmark" href="/" aria-label="파랑새들의 둥지 홈"><img src="/images/bluebirds-mark.png" alt="파랑새들의 둥지" width="32" height="32" /></a>
   <nav aria-label="주요 메뉴">
-    <a href="/#writing">글</a><a href="/about">소개</a>
+    <a href="/posts" class:list={{ active: isPostsPage }}>글</a>
+    <a href="/about" class:list={{ active: isAboutPage }}>소개</a>
   </nav>
 </header>
+
+<style is:global>
+  .site-header{position:relative!important;display:flex!important;align-items:center!important;max-width:none!important;height:72px!important;margin:0!important;border:0!important;background:#fff!important;padding-inline:max(24px,calc((100vw - 1280px)/2 + 24px))!important}.site-header::after,.site-header .wordmark::after{display:none!important;content:none!important}.site-header .wordmark img{width:32px!important;height:32px!important}.site-header nav{position:static!important;display:flex!important;margin-left:44px!important;gap:28px!important;transform:none!important}.site-header nav a,.site-header nav a:first-child,.site-header nav a.active{position:relative!important;display:flex!important;align-items:center!important;height:72px!important;border:0!important;padding:0!important;color:#666a74!important;font-size:14px!important;font-weight:600!important;line-height:normal!important}.site-header nav a.active{color:#171924!important}.site-header nav a.active::after{display:none!important;content:none!important}@media(max-width:744px){.site-header{height:64px!important;padding-inline:20px!important}.site-header nav{margin-left:auto!important;gap:16px!important}.site-header nav a,.site-header nav a:first-child,.site-header nav a.active{height:64px!important;font-size:13px!important}}
+</style>

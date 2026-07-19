@@ -1,0 +1,26 @@
+---
+import { env } from 'cloudflare:workers';
+import SiteFooter from '../../components/SiteFooter.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import PostFeed from '../../components/posts/PostFeed.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listPublishedPosts } from '../../../functions/api/admin/posts/repository';
+
+const posts = await listPublishedPosts((env as never as { DB: Parameters<typeof listPublishedPosts>[0] }).DB);
+const tags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => a.localeCompare(b, 'ko'));
+---
+
+<BaseLayout title="글 — 파랑새들의 둥지" description="파랑새들의 둥지에 쌓이는 모든 기록." bodyClass="posts-page">
+  <SiteHeader />
+  <main id="top" class="posts-archive">
+    <header class="posts-archive-intro">
+      <p>일과 기술, 그리고 오래 붙잡고 싶은 장면을 공유합니다.</p>
+    </header>
+    <PostFeed posts={posts} tags={tags} title="모든 기록" variant="home" headingId="all-posts-title" id="all-posts" />
+  </main>
+  <SiteFooter />
+
+  <style is:global>
+    .posts-page{background:#fff}.posts-archive{max-width:1280px;margin:auto;padding:24px 24px 96px}.posts-archive-intro{padding:0 0 30px}.posts-archive-intro p{margin:0;color:#606772;font-size:20px;letter-spacing:-.045em}.posts-archive .post-feed{max-width:none;margin:0;padding:0}.posts-archive .post-feed-header{display:flex;align-items:center;justify-content:space-between;padding:0 0 18px}.posts-archive .post-feed-header h2{margin:0;font-size:30px;letter-spacing:-.06em}.posts-archive .post-feed-header>span{color:#737783;font-size:13px}.posts-archive .post-search{display:flex;align-items:center;gap:10px;width:min(100%,620px);height:50px;margin:0 auto 22px;border:1px solid #dedfe5;border-radius:12px;padding:0 15px}.posts-archive .post-search>span{font-size:22px}.posts-archive .post-search input{width:100%;border:0;outline:0;font:14px Pretendard,system-ui,sans-serif}.posts-archive .post-tags{display:flex;gap:8px;margin:0 0 26px;padding:0;overflow:auto}.posts-archive .post-tags button{flex:none;border:1px solid #e2e3e7;border-radius:999px;background:#fff;padding:8px 12px;color:#646875;font:500 13px/1 Pretendard,system-ui,sans-serif}.posts-archive .post-tags button.is-active{border-color:#3469e7;background:#3469e7;color:#fff}.posts-archive .post-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.posts-archive .post-feed-empty{margin:0;border:1px solid #e7e7ea;border-radius:16px;padding:72px 24px;color:#737887;text-align:center}@media(max-width:900px){.posts-archive .post-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:700px){.posts-archive{padding:20px 20px 64px}.posts-archive-intro{padding-bottom:24px}.posts-archive-intro p{font-size:17px}.posts-archive .post-feed-header h2{font-size:26px}.posts-archive .post-grid{grid-template-columns:1fr}}
+  </style>
+</BaseLayout>
