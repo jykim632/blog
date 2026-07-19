@@ -10,6 +10,8 @@ const posts = defineCollection({
     publishedAt: z.coerce.date(),
     category: z.string().min(1),
     tags: z.array(z.string().min(1)).default([]),
+    cover: z.string().min(1).optional(),
+    coverAlt: z.string().min(1).optional(),
     draft: z.boolean().default(false),
   }),
 });

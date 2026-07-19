@@ -36,6 +36,8 @@ publishedAt: 2026-07-19
 category: WORK & CRAFT
 tags:
   - 태그
+cover: /images/post-cover.jpg
+coverAlt: 글 커버 이미지 설명
 draft: false
 ---
 
@@ -61,3 +63,7 @@ docs/               로드맵 및 API·DB 설계 문서
 Cloudflare Pages는 `pnpm build` 결과물인 `dist/`를 배포합니다. 배포 설정은 `wrangler.jsonc`에 있습니다.
 
 현재 블로그는 Git 기반의 정적 콘텐츠 발행을 기본 흐름으로 사용합니다. D1과 posts API 관련 문서는 향후 CMS 도입을 검토하기 위한 설계 자료이며, 상세 방향은 [로드맵](docs/roadmap.md)을 참고하세요.
+
+## 이미지 관리
+
+`/admin/media`는 Cloudflare Access로 보호되는 이미지 관리 화면입니다. 이미지 원본은 R2에, 파일명·대체 텍스트·URL 등의 정보는 D1 `media_assets` 테이블에 저장합니다. 배포 전에 R2 binding `MEDIA_BUCKET`, D1 binding `DB`, 그리고 Access 환경값을 Cloudflare Pages 프로젝트에 설정해야 합니다. 상세한 API·설정 계약은 [이미지 API 문서](docs/media-api-contract.md)를 참고하세요.

@@ -7,31 +7,85 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort((a, b) => a.localeCompare(b, 'ko'));
+const formatDate = (date: Date) => date.toLocaleDateString('ko-KR', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).replace(/\. /g, '.').replace(/\.$/, '');
 ---
 
-<BaseLayout title="여백의 기록 — JY의 블로그" description="일과 기술에 대한 기록." bodyClass="blog-home">
+<BaseLayout title="파랑새들의 둥지" description="파랑새들의 둥지에 쌓이는 기록." bodyClass="blog-home">
   <SiteHeader />
   <main id="top">
-    <section class="archive-hero" aria-labelledby="home-title">
-      <p>YEOBAEK RECORDS</p>
-      <h1 id="home-title">글</h1>
-      <p class="archive-description">일과 기술에 대한 기록.</p>
-    </section>
-    <section class="archive-list" id="writing" aria-labelledby="writing-title">
-      <div class="archive-list-heading"><h2 id="writing-title">전체 <span>{posts.length}</span></h2></div>
-      {posts.map((post) => (
-        <article class="archive-card">
+    <section class="post-feed" id="writing" aria-labelledby="writing-title">
+      <header class="post-feed-header">
+        <p>POSTS</p>
+        <h1 id="writing-title">최신 글</h1>
+      </header>
+      <div class="post-tags" aria-label="글 태그">
+        <button class="is-active" type="button" data-tag-filter="all" aria-pressed="true">전체 <span>{posts.length}</span></button>
+        {tags.map((tag) => <button type="button" data-tag-filter={tag} aria-pressed="false">{tag}</button>)}
+      </div>
+      <div class="post-grid">
+      {posts.map((post, index) => (
+        <article class="post-card" data-post-card data-tags={post.data.tags.join('|')} hidden={index >= 15}>
           <a href={`/posts/${post.id}`}>
-            <div class="archive-card-art" aria-hidden="true"><span>{post.data.category}</span></div>
-            <div class="archive-card-copy">
-              <p>{post.data.category} <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')}</time></p>
+            <div class="post-card-image" data-tone={String(index % 6)}>
+              {post.data.cover ? <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading={index < 3 ? 'eager' : 'lazy'} /> : <span aria-hidden="true">{post.data.category}</span>}
+            </div>
+            <div class="post-card-copy">
+              <p><time datetime={post.data.publishedAt.toISOString()}>{formatDate(post.data.publishedAt)}</time></p>
               <h3>{post.data.title}</h3>
-              <span class="archive-card-more">글 읽기 <i aria-hidden="true">→</i></span>
             </div>
           </a>
         </article>
       ))}
+      </div>
+      <div class="post-feed-sentinel" data-post-sentinel aria-hidden="true"></div>
     </section>
   </main>
+  <script>
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-post-card]'));
+    const filters = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tag-filter]'));
+    const sentinel = document.querySelector<HTMLElement>('[data-post-sentinel]');
+    const batchSize = 15;
+    let activeTag = 'all';
+    let visibleCount = batchSize;
+
+    const renderCards = () => {
+      let matchedCount = 0;
+
+      cards.forEach((card) => {
+        const matches = activeTag === 'all' || card.dataset.tags?.split('|').includes(activeTag);
+        card.hidden = !matches || matchedCount >= visibleCount;
+        if (matches) matchedCount += 1;
+      });
+
+      if (sentinel) sentinel.hidden = matchedCount <= visibleCount;
+    };
+
+    filters.forEach((filter) => {
+      filter.addEventListener('click', () => {
+        activeTag = filter.dataset.tagFilter ?? 'all';
+        visibleCount = batchSize;
+        filters.forEach((button) => {
+          const selected = button === filter;
+          button.classList.toggle('is-active', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        });
+        renderCards();
+      });
+    });
+
+    if (sentinel) {
+      new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          visibleCount += batchSize;
+          renderCards();
+        }
+      }, { rootMargin: '300px' }).observe(sentinel);
+    }
+  </script>
   <SiteFooter />
 </BaseLayout>

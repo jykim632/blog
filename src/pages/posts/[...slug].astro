@@ -22,18 +22,30 @@ const publishedAt = post.data.publishedAt.toLocaleDateString('ko-KR', {
 }).replace(/\. /g, '.').replace(/\.$/, '');
 ---
 
-<BaseLayout title={`${post.data.title} — 여백의 기록`} description={post.data.summary} bodyClass="article-page">
+<BaseLayout title={`${post.data.title} — 파랑새들의 둥지`} description={post.data.summary} bodyClass="article-page">
   <div class="reading-progress" aria-hidden="true"><span></span></div>
   <SiteHeader />
   <main id="top">
     <article class="essay">
       <header class="essay-header">
-        <a class="back-link" href="/#writing">← 모든 글</a>
+        <div class="essay-utility">
+          <a class="back-link" href="/#writing">← 모든 글</a>
+          <span>RECORD / {publishedAt}</span>
+        </div>
         <div class="essay-meta"><span>{post.data.category}</span><time datetime={post.data.publishedAt.toISOString()}>{publishedAt}</time></div>
         <h1>{post.data.title}</h1>
         <p class="essay-dek">{post.data.summary}</p>
+        {post.data.tags.length > 0 && (
+          <ul class="essay-tags" aria-label="글 태그">
+            {post.data.tags.map((tag) => <li>#{tag}</li>)}
+          </ul>
+        )}
       </header>
       <div class="essay-layout">
+        <aside class="essay-rail" aria-label="글 정보">
+          <span>READING</span>
+          <strong>ARTICLE</strong>
+        </aside>
         <div class="essay-body"><Content /></div>
       </div>
     </article>
