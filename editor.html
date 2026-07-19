@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="여백의 기록 글쓰기" />
+    <title>새 글 쓰기 — 여백의 기록</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="editor-page">
+    <div class="page-grain" aria-hidden="true"></div>
+    <header class="site-header editor-header">
+      <a class="wordmark" href="index.html" aria-label="여백의 기록 홈">여백의 기록<span>.</span></a>
+      <p class="editor-status" aria-live="polite">새 글</p>
+      <div class="editor-actions"><button class="plain-button" id="preview-toggle" type="button">미리보기</button><button class="plain-button" id="save-draft" type="button">임시 저장</button><button class="publish-button" id="export-html" type="button">HTML 내보내기 ↗</button><button class="theme-button" type="button" aria-label="어두운 화면으로 전환" aria-pressed="false"><span>◐</span><span class="theme-label">Night</span></button></div>
+    </header>
+    <main class="editor-shell">
+      <section class="editor-intro"><p class="eyebrow">NEW FIELD NOTE</p><p>완성하려 하지 말고,<br />먼저 <em>남겨두기.</em></p></section>
+      <form class="writer" id="writer-form">
+        <div class="writer-meta"><label>카테고리 <select id="category"><option>WORK &amp; CRAFT</option><option>TECH</option><option>LIFE</option><option>NOTE</option></select></label><label>읽기 시간 <input id="read-time" type="number" min="1" max="99" value="5" /> MIN</label><time id="writing-date"></time></div>
+        <label class="title-field"><span class="sr-only">제목</span><textarea id="post-title" rows="2" maxlength="90" placeholder="제목을 적어주세요"></textarea></label>
+        <label class="summary-field"><span>한 줄 소개</span><textarea id="post-summary" rows="2" maxlength="240" placeholder="이 글을 읽기 전에 알면 좋은 한 문장을 적어보세요."></textarea></label>
+        <div class="editor-toolbar" role="toolbar" aria-label="본문 서식"><button type="button" data-command="bold" title="굵게">B</button><button type="button" data-command="italic" title="기울임">I</button><button type="button" data-command="heading" title="소제목">H2</button><button type="button" data-command="bulletList" title="목록">•</button><button type="button" data-command="blockquote" title="인용">❝</button><button type="button" data-command="undo" title="실행 취소">↶</button><button type="button" data-command="redo" title="다시 실행">↷</button><span>서식 있는 글은 Tiptap JSON으로 저장됩니다</span></div>
+        <div class="body-field" id="post-body" aria-label="본문"></div>
+        <div class="writer-footer"><span id="word-count">0자</span><span>이 브라우저에만 임시 저장됩니다.</span></div>
+      </form>
+      <article class="editor-preview" id="editor-preview" hidden aria-live="polite"><p class="eyebrow" id="preview-category">WORK &amp; CRAFT · 5 MIN READ</p><h1 id="preview-title">제목을 적어주세요</h1><p class="preview-summary" id="preview-summary">이 글을 읽기 전에 알면 좋은 한 문장을 적어보세요.</p><div class="preview-body" id="preview-body"><p>본문을 작성하면 여기에서 읽기 화면을 미리 볼 수 있습니다.</p></div></article>
+    </main>
+    <script src="script.js"></script>
+    <script type="module" src="editor.js"></script>
+  </body>
+</html>

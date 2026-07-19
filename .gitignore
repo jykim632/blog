@@ -1,0 +1,7 @@
+node_modules/
+.astro/
+.pnpm-store/
+.wrangler/
+.env
+.env.*
+!.env.example
