@@ -3,17 +3,20 @@ const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 function setTheme(isNight) {
   document.body.classList.toggle('night', isNight);
-  button.setAttribute('aria-pressed', String(isNight));
-  button.setAttribute('aria-label', isNight ? '밝은 화면으로 전환' : '어두운 화면으로 전환');
-  button.querySelector('.theme-label').textContent = isNight ? 'Day' : 'Night';
+  button?.setAttribute('aria-pressed', String(isNight));
+  button?.setAttribute('aria-label', isNight ? '밝은 화면으로 전환' : '어두운 화면으로 전환');
+  const label = button?.querySelector('.theme-label');
+  if (label) label.textContent = isNight ? 'Day' : 'Night';
 }
 
-setTheme(localStorage.getItem('theme') ? localStorage.getItem('theme') === 'night' : prefersDark.matches);
-button.addEventListener('click', () => {
-  const isNight = !document.body.classList.contains('night');
-  setTheme(isNight);
-  localStorage.setItem('theme', isNight ? 'night' : 'day');
-});
+if (button) {
+  setTheme(localStorage.getItem('theme') ? localStorage.getItem('theme') === 'night' : prefersDark.matches);
+  button.addEventListener('click', () => {
+    const isNight = !document.body.classList.contains('night');
+    setTheme(isNight);
+    localStorage.setItem('theme', isNight ? 'night' : 'day');
+  });
+}
 
 const progress = document.querySelector('.reading-progress span');
 if (progress) {
