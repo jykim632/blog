@@ -36,8 +36,8 @@ type ApiResult<T> =
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/admin/media?q=&cursor=` | List up to 48 images, newest first. |
-| `POST` | `/api/admin/media` | Upload `file` and optional `alt` multipart fields. Allows JPG, PNG, WebP, GIF, AVIF up to 10MB. |
-| `PATCH` | `/api/admin/media/:id` | Update `{ alt }`. |
+| `POST` | `/api/admin/media` | Upload `file` plus optional `filename` and `alt` multipart fields. Allows JPG, PNG, WebP, GIF, AVIF up to 10MB. |
+| `PATCH` | `/api/admin/media/:id` | Update `{ alt?, filename? }`. Filename updates D1 metadata only; the R2 object key and public URL remain unchanged. |
 | `DELETE` | `/api/admin/media/:id` | Delete the R2 object and its D1 record. |
 
 Expected error codes include `UNAUTHENTICATED`, `AUTH_CONFIGURATION_ERROR`, `VALIDATION_ERROR`, `NOT_FOUND`, `MEDIA_CONFIGURATION_ERROR`, and `INTERNAL_ERROR`.

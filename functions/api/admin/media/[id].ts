@@ -1,5 +1,5 @@
 import { error, json } from '../_lib/api';
-import { mediaAltTextSchema, mediaIdSchema } from './schema';
+import { mediaIdSchema, mediaUpdateSchema } from './schema';
 
 interface Env {
   DB: D1Database;
@@ -9,18 +9,20 @@ interface Env {
 export const onRequestPatch: PagesFunction<Env> = async ({ request, env, params }) => {
   const id = mediaIdSchema.safeParse(params.id);
   const body = await request.json().catch(() => null);
-  const alt = mediaAltTextSchema.safeParse(body?.alt);
-  if (!id.success || !alt.success) {
-    return error(400, 'VALIDATION_ERROR', '대체 텍스트를 확인해 주세요.', { alt: '240자 이하로 입력해 주세요.' });
+  const update = mediaUpdateSchema.safeParse(body);
+  if (!id.success || !update.success) {
+    return error(400, 'VALIDATION_ERROR', '파일 이름 또는 대체 텍스트를 확인해 주세요.', { filename: '파일 이름은 1~180자여야 합니다.', alt: '대체 텍스트는 240자 이하여야 합니다.' });
   }
   try {
-    const result = await env.DB.prepare('UPDATE media_assets SET alt_text = ?1, updated_at = ?2 WHERE id = ?3')
-      .bind(alt.data, new Date().toISOString(), id.data)
+    const result = await env.DB.prepare(
+      'UPDATE media_assets SET original_filename = COALESCE(?1, original_filename), alt_text = COALESCE(?2, alt_text), updated_at = ?3 WHERE id = ?4',
+    )
+      .bind(update.data.filename ?? null, update.data.alt ?? null, new Date().toISOString(), id.data)
       .run();
     if (!result.meta.changes) return error(404, 'NOT_FOUND', '이미지를 찾을 수 없습니다.');
-    return json({ ok: true, data: { id: id.data, altText: alt.data } });
+    return json({ ok: true, data: { id: id.data, filename: update.data.filename, altText: update.data.alt } });
   } catch {
-    return error(500, 'INTERNAL_ERROR', '대체 텍스트를 저장하지 못했습니다.');
+    return error(500, 'INTERNAL_ERROR', '이미지 정보를 저장하지 못했습니다.');
   }
 };
 

@@ -1,5 +1,5 @@
 import { error, json } from '../_lib/api';
-import { allowedImageTypes, mediaAltTextSchema, mediaSearchSchema, type AllowedImageType } from './schema';
+import { allowedImageTypes, mediaAltTextSchema, mediaFilenameSchema, mediaSearchSchema, type AllowedImageType } from './schema';
 
 interface Env {
   DB: D1Database;
@@ -81,6 +81,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!parsedAlt.success) {
     return error(400, 'VALIDATION_ERROR', '대체 텍스트를 확인해 주세요.', { alt: '240자 이하로 입력해 주세요.' });
   }
+  const filenameValue = form.get('filename');
+  const parsedFilename = mediaFilenameSchema.safeParse(typeof filenameValue === 'string' && filenameValue.trim() ? filenameValue : candidate.name);
+  if (!parsedFilename.success) {
+    return error(400, 'VALIDATION_ERROR', '파일 이름을 확인해 주세요.', { filename: '파일 이름은 1~180자여야 합니다.' });
+  }
   if (!env.MEDIA_PUBLIC_URL) return error(503, 'MEDIA_CONFIGURATION_ERROR', '이미지 저장소 설정이 완료되지 않았습니다.');
 
   const id = crypto.randomUUID();
@@ -97,11 +102,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     await env.DB.prepare(
       `INSERT INTO media_assets (id, object_key, public_url, original_filename, alt_text, content_type, bytes, created_at, updated_at)
        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?8)`,
-    ).bind(id, objectKey, publicUrl, candidate.name, parsedAlt.data, candidate.type, candidate.size, now).run();
+    ).bind(id, objectKey, publicUrl, parsedFilename.data, parsedAlt.data, candidate.type, candidate.size, now).run();
   } catch {
     await env.MEDIA_BUCKET.delete(objectKey).catch(() => undefined);
     return error(500, 'INTERNAL_ERROR', '이미지를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
   }
 
-  return json({ ok: true, data: { id, objectKey, publicUrl, originalFilename: candidate.name, altText: parsedAlt.data, contentType: candidate.type, bytes: candidate.size, createdAt: now, updatedAt: now } }, 201);
+  return json({ ok: true, data: { id, objectKey, publicUrl, originalFilename: parsedFilename.data, altText: parsedAlt.data, contentType: candidate.type, bytes: candidate.size, createdAt: now, updatedAt: now } }, 201);
 };
