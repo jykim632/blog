@@ -2,5 +2,24 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "blog",
   "compatibility_date": "2026-07-18",
-  "pages_build_output_dir": "./dist"
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "blog",
+      "database_id": "9f5c594e-531e-4587-8ce1-8c5fca6506fd",
+      "migrations_dir": "db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "bluebirds-media"
+    }
+  ],
+  "vars": {
+    "MEDIA_PUBLIC_URL": "https://media.bluebirds.cloud",
+    "MEDIA_ACCESS_TEAM_DOMAIN": "https://long-disk-2ff5.cloudflareaccess.com",
+    "MEDIA_ACCESS_EMAIL": "jykim632@gmail.com"
+  }
 }

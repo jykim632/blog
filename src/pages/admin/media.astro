@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="이미지 관리 — 파랑새들의 둥지" description="블로그 이미지 관리 화면" bodyClass="media-admin-page">
+  <main class="media-admin" id="top">
+    <header class="media-admin-header">
+      <a class="media-admin-brand" href="/">파랑새들의 둥지<span>/ ADMIN</span></a>
+      <a class="media-admin-exit" href="/">공개 블로그로 ↗</a>
+    </header>
+
+    <section class="media-admin-intro" aria-labelledby="media-title">
+      <div>
+        <p class="media-kicker">MEDIA LIBRARY</p>
+        <h1 id="media-title">글에 넣을 이미지를<br />한곳에 모읍니다.</h1>
+      </div>
+      <p class="media-count" data-media-count>이미지를 불러오는 중</p>
+    </section>
+
+    <section class="media-workspace" aria-label="이미지 라이브러리">
+      <form class="media-upload" data-upload-form>
+        <input class="sr-only" id="media-file" name="file" type="file" accept="image/avif,image/gif,image/jpeg,image/png,image/webp" data-file-input />
+        <label class="media-dropzone" for="media-file" data-dropzone>
+          <span class="media-dropzone-mark" aria-hidden="true">+</span>
+          <strong>이미지를 놓거나 선택하세요</strong>
+          <small>JPG, PNG, WebP, GIF, AVIF · 최대 10MB</small>
+        </label>
+        <div class="media-upload-fields">
+          <label>대체 텍스트 <input name="alt" type="text" maxlength="240" placeholder="이미지를 설명해 주세요" /></label>
+          <button type="submit" class="media-upload-button" disabled data-upload-button>업로드</button>
+        </div>
+      </form>
+
+      <div class="media-toolbar">
+        <label class="media-search"><span class="sr-only">이미지 검색</span><input type="search" placeholder="파일명 또는 대체 텍스트 검색" data-search /></label>
+        <p data-media-status aria-live="polite"></p>
+      </div>
+
+      <div class="media-grid" data-media-grid aria-live="polite"></div>
+      <div class="media-empty" data-media-empty hidden>
+        <strong>아직 이미지가 없습니다.</strong>
+        <p>첫 번째 이미지를 올리고 글에 바로 넣어보세요.</p>
+      </div>
+    </section>
+  </main>
+
+  <aside class="media-detail" data-detail-panel hidden aria-label="이미지 상세">
+    <button class="media-detail-close" type="button" data-detail-close aria-label="상세 패널 닫기">×</button>
+    <div class="media-detail-preview"><img data-detail-image alt="" /></div>
+    <div class="media-detail-copy">
+      <p class="media-kicker">SELECTED IMAGE</p>
+      <h2 data-detail-name></h2>
+      <p class="media-detail-info" data-detail-info></p>
+      <label class="media-detail-alt">대체 텍스트 <input type="text" maxlength="240" data-detail-alt /></label>
+      <div class="media-detail-actions">
+        <button type="button" data-copy-url>URL 복사</button>
+        <button type="button" class="is-primary" data-copy-markdown>Markdown 복사</button>
+      </div>
+      <button type="button" class="media-delete" data-delete-image>이미지 삭제</button>
+    </div>
+  </aside>
+
+  <script>
+    type MediaAsset = { id:string; publicUrl:string; originalFilename:string; altText:string; contentType:string; bytes:number; createdAt:string; updatedAt:string };
+    type ApiResult<T> = { ok:true; data:T } | { ok:false; error:{ code:string; message:string; fields?:Record<string,string> } };
+    const grid = document.querySelector<HTMLElement>('[data-media-grid]')!;
+    const empty = document.querySelector<HTMLElement>('[data-media-empty]')!;
+    const status = document.querySelector<HTMLElement>('[data-media-status]')!;
+    const count = document.querySelector<HTMLElement>('[data-media-count]')!;
+    const form = document.querySelector<HTMLFormElement>('[data-upload-form]')!;
+    const fileInput = document.querySelector<HTMLInputElement>('[data-file-input]')!;
+    const uploadButton = document.querySelector<HTMLButtonElement>('[data-upload-button]')!;
+    const search = document.querySelector<HTMLInputElement>('[data-search]')!;
+    const detail = document.querySelector<HTMLElement>('[data-detail-panel]')!;
+    const detailImage = document.querySelector<HTMLImageElement>('[data-detail-image]')!;
+    const detailName = document.querySelector<HTMLElement>('[data-detail-name]')!;
+    const detailInfo = document.querySelector<HTMLElement>('[data-detail-info]')!;
+    const detailAlt = document.querySelector<HTMLInputElement>('[data-detail-alt]')!;
+    let items: MediaAsset[] = [];
+    let selected: MediaAsset | null = null;
+
+    const formatBytes = (bytes:number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    const escape = (value:string) => value.replace(/[&<>'"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[character]!));
+    const request = async <T,>(url:string, init?:RequestInit) => {
+      const response = await fetch(url, init);
+      const result = await response.json() as ApiResult<T>;
+      if (!result.ok) throw new Error(result.error.message);
+      return result.data;
+    };
+    const render = () => {
+      grid.innerHTML = items.map((item) => `<button class="media-card" type="button" data-media-id="${item.id}"><img src="${item.publicUrl}" alt="${escape(item.altText)}" loading="lazy" /><span><strong>${escape(item.originalFilename)}</strong><small>${formatBytes(item.bytes)} · ${new Date(item.createdAt).toLocaleDateString('ko-KR')}</small></span></button>`).join('');
+      empty.hidden = items.length > 0;
+      count.textContent = `${items.length} ${items.length === 1 ? 'image' : 'images'}`;
+    };
+    const load = async (query = '') => {
+      status.textContent = '불러오는 중';
+      try {
+        const data = await request<{ items:MediaAsset[] }>(`/api/admin/media?q=${encodeURIComponent(query)}`);
+        items = data.items;
+        render();
+        status.textContent = '';
+      } catch (cause) {
+        items = [];
+        render();
+        status.textContent = cause instanceof Error ? cause.message : '이미지를 불러오지 못했습니다.';
+      }
+    };
+    const copy = async (value:string, message:string) => {
+      await navigator.clipboard.writeText(value);
+      status.textContent = message;
+      window.setTimeout(() => { status.textContent = ''; }, 1800);
+    };
+
+    fileInput.addEventListener('change', () => { uploadButton.disabled = !fileInput.files?.length; });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      uploadButton.disabled = true;
+      uploadButton.textContent = '업로드 중';
+      try {
+        const asset = await request<MediaAsset>('/api/admin/media', { method:'POST', body:new FormData(form) });
+        items.unshift(asset);
+        form.reset();
+        render();
+        status.textContent = '이미지를 추가했습니다.';
+      } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '이미지를 업로드하지 못했습니다.'; }
+      finally { uploadButton.textContent = '업로드'; uploadButton.disabled = !fileInput.files?.length; }
+    });
+    grid.addEventListener('click', (event) => {
+      const card = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-media-id]');
+      const item = items.find((entry) => entry.id === card?.dataset.mediaId);
+      if (!item) return;
+      selected = item;
+      detailImage.src = item.publicUrl;
+      detailImage.alt = item.altText;
+      detailName.textContent = item.originalFilename;
+      detailInfo.textContent = `${formatBytes(item.bytes)} · ${new Date(item.createdAt).toLocaleDateString('ko-KR')}`;
+      detailAlt.value = item.altText;
+      detail.hidden = false;
+    });
+    grid.addEventListener('error', (event) => {
+      const image = event.target;
+      if (!(image instanceof HTMLImageElement)) return;
+      image.closest('.media-card')?.classList.add('is-broken');
+      image.alt = '이미지 미리보기를 불러오지 못했습니다.';
+      status.textContent = '일부 이미지 미리보기를 불러오지 못했습니다.';
+    }, true);
+    detailImage.addEventListener('error', () => {
+      detailImage.closest('.media-detail-preview')?.classList.add('is-broken');
+      detailImage.alt = '이미지 미리보기를 불러오지 못했습니다.';
+      status.textContent = '이미지 미리보기를 불러오지 못했습니다.';
+    });
+    document.querySelector('[data-detail-close]')?.addEventListener('click', () => { detail.hidden = true; selected = null; });
+    document.querySelector('[data-copy-url]')?.addEventListener('click', () => selected && copy(selected.publicUrl, 'URL을 복사했습니다.'));
+    document.querySelector('[data-copy-markdown]')?.addEventListener('click', () => selected && copy(`![${detailAlt.value || selected.originalFilename}](${selected.publicUrl})`, 'Markdown을 복사했습니다.'));
+    detailAlt.addEventListener('change', async () => {
+      if (!selected) return;
+      try {
+        const data = await request<{ id:string; altText:string }>(`/api/admin/media/${selected.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ alt:detailAlt.value }) });
+        selected.altText = data.altText;
+        items = items.map((item) => item.id === data.id ? { ...item, altText:data.altText } : item);
+        render();
+        status.textContent = '대체 텍스트를 저장했습니다.';
+      } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '저장하지 못했습니다.'; }
+    });
+    document.querySelector('[data-delete-image]')?.addEventListener('click', async () => {
+      if (!selected || !window.confirm(`“${selected.originalFilename}” 이미지를 삭제할까요?`)) return;
+      try {
+        await request<{ id:string }>(`/api/admin/media/${selected.id}`, { method:'DELETE' });
+        items = items.filter((item) => item.id !== selected!.id);
+        detail.hidden = true;
+        selected = null;
+        render();
+        status.textContent = '이미지를 삭제했습니다.';
+      } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '삭제하지 못했습니다.'; }
+    });
+    let searchTimer = 0;
+    search.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(() => load(search.value), 250); });
+    load();
+  </script>
+</BaseLayout>

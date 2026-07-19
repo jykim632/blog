@@ -8,7 +8,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "cf:dev": "wrangler pages dev dist --d1=DB",
+    "cf:dev": "wrangler pages dev dist",
     "db:migrate:local": "wrangler d1 migrations apply blog-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply blog-db --remote"
   },
