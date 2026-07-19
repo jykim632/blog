@@ -1,0 +1,15 @@
+---
+interface Props {
+  label: string;
+  dataAttribute: 'data-detail-filename' | 'data-detail-alt';
+  maxLength: number;
+}
+
+const { label, dataAttribute, maxLength } = Astro.props;
+const dataAttributes = { [dataAttribute]: '' };
+---
+
+<label class="apple-media-detail-alt">
+  {label}
+  <input type="text" maxlength={maxLength} {...dataAttributes} />
+</label>

@@ -1,94 +1,129 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import MediaDetailField from '../../components/admin/MediaDetailField.astro';
 ---
 
-<BaseLayout title="이미지 관리 — 파랑새들의 둥지" description="블로그 이미지 관리 화면" bodyClass="media-admin-page">
-  <main class="media-admin" id="top">
-    <header class="media-admin-header">
-      <a class="media-admin-brand" href="/">파랑새들의 둥지<span>/ ADMIN</span></a>
-      <a class="media-admin-exit" href="/">공개 블로그로 ↗</a>
+<BaseLayout title="이미지 관리 — 파랑새들의 둥지" description="블로그 이미지 관리 화면" bodyClass="apple-media-page">
+  <SiteHeader />
+
+  <main class="apple-media" id="top">
+    <header class="apple-media-sub-nav">
+      <span>이미지 관리</span>
+      <div>
+        <p data-media-count>이미지를 불러오는 중</p>
+        <button type="button" class="apple-media-primary-button" data-upload-open>이미지 추가</button>
+        <a class="apple-media-logout" href="/cdn-cgi/access/logout">로그아웃</a>
+      </div>
     </header>
 
-    <section class="media-admin-intro" aria-labelledby="media-title">
-      <div>
-        <p class="media-kicker">MEDIA LIBRARY</p>
-        <h1 id="media-title">글에 넣을 이미지를<br />한곳에 모읍니다.</h1>
-      </div>
-      <p class="media-count" data-media-count>이미지를 불러오는 중</p>
-    </section>
-
-    <section class="media-workspace" aria-label="이미지 라이브러리">
-      <form class="media-upload" data-upload-form>
+    <section class="apple-media-upload-modal" data-upload-modal hidden aria-label="이미지 업로드" role="dialog" aria-modal="true">
+      <div class="apple-media-upload-modal-card">
+      <button type="button" class="apple-media-upload-close" data-upload-close aria-label="업로드 창 닫기">×</button>
+      <form class="apple-media-upload" data-upload-form>
         <input class="sr-only" id="media-file" name="file" type="file" accept="image/avif,image/gif,image/jpeg,image/png,image/webp" data-file-input />
-        <label class="media-dropzone" for="media-file" data-dropzone>
-          <span class="media-dropzone-mark" aria-hidden="true">+</span>
-          <strong>이미지를 놓거나 선택하세요</strong>
-          <small>JPG, PNG, WebP, GIF, AVIF · 최대 10MB</small>
+        <label class="apple-media-dropzone" for="media-file" data-dropzone>
+          <span class="apple-media-dropzone-icon" aria-hidden="true">↑</span>
+          <strong>이미지 추가</strong>
+          <small>파일을 놓거나 선택하세요</small>
+          <img class="apple-media-upload-preview" data-upload-preview alt="선택한 이미지 미리보기" hidden />
+          <span class="apple-media-upload-info" data-upload-info hidden></span>
         </label>
-        <div class="media-upload-fields">
-          <label>대체 텍스트 <input name="alt" type="text" maxlength="240" placeholder="이미지를 설명해 주세요" /></label>
-          <button type="submit" class="media-upload-button" disabled data-upload-button>업로드</button>
+        <div class="apple-media-upload-fields">
+          <label class="sr-only" for="media-filename">파일 이름</label>
+          <input id="media-filename" name="filename" type="text" maxlength="180" placeholder="파일 이름" />
+          <label class="sr-only" for="media-alt">대체 텍스트</label>
+          <input id="media-alt" name="alt" type="text" maxlength="240" placeholder="대체 텍스트 (선택 사항)" />
+          <button type="submit" class="apple-media-primary-button" disabled data-upload-button>업로드</button>
         </div>
       </form>
+      <p>JPG, PNG, WebP, GIF, AVIF · 최대 10MB</p>
+      </div>
+    </section>
 
-      <div class="media-toolbar">
-        <label class="media-search"><span class="sr-only">이미지 검색</span><input type="search" placeholder="파일명 또는 대체 텍스트 검색" data-search /></label>
-        <p data-media-status aria-live="polite"></p>
+    <section class="apple-media-library" aria-label="이미지 라이브러리">
+      <div class="apple-media-toolbar">
+        <label class="apple-media-search"><span class="sr-only">이미지 검색</span><input type="search" placeholder="이미지 검색" data-search /></label>
+        <div class="apple-media-toolbar-status">
+          <p data-media-status aria-live="polite"></p>
+        </div>
       </div>
 
-      <div class="media-grid" data-media-grid aria-live="polite"></div>
-      <div class="media-empty" data-media-empty hidden>
+      <div class="apple-media-grid" data-media-grid aria-live="polite"></div>
+      <div class="apple-media-empty" data-media-empty hidden>
         <strong>아직 이미지가 없습니다.</strong>
         <p>첫 번째 이미지를 올리고 글에 바로 넣어보세요.</p>
       </div>
     </section>
   </main>
 
-  <aside class="media-detail" data-detail-panel hidden aria-label="이미지 상세">
-    <button class="media-detail-close" type="button" data-detail-close aria-label="상세 패널 닫기">×</button>
-    <div class="media-detail-preview"><img data-detail-image alt="" /></div>
-    <div class="media-detail-copy">
-      <p class="media-kicker">SELECTED IMAGE</p>
-      <h2 data-detail-name></h2>
-      <p class="media-detail-info" data-detail-info></p>
-      <label class="media-detail-alt">대체 텍스트 <input type="text" maxlength="240" data-detail-alt /></label>
-      <div class="media-detail-actions">
+  <aside class="apple-media-detail" data-detail-panel hidden aria-label="이미지 상세">
+    <button class="apple-media-detail-close" type="button" data-detail-close aria-label="상세 패널 닫기">×</button>
+    <div class="apple-media-detail-preview"><img data-detail-image alt="" /></div>
+    <div class="apple-media-detail-copy">
+      <MediaDetailField label="파일 이름" dataAttribute="data-detail-filename" maxLength={180} />
+      <p class="apple-media-detail-info" data-detail-info></p>
+      <p class="apple-media-detail-path" data-detail-path></p>
+      <MediaDetailField label="대체 텍스트" dataAttribute="data-detail-alt" maxLength={240} />
+      <div class="apple-media-detail-actions">
         <button type="button" data-copy-url>URL 복사</button>
-        <button type="button" class="is-primary" data-copy-markdown>Markdown 복사</button>
+        <button type="button" class="apple-media-primary-button" data-copy-markdown>Markdown 복사</button>
       </div>
-      <button type="button" class="media-delete" data-delete-image>이미지 삭제</button>
+      <button type="button" class="apple-media-delete" data-delete-image>이미지 삭제</button>
     </div>
   </aside>
 
   <script>
-    type MediaAsset = { id:string; publicUrl:string; originalFilename:string; altText:string; contentType:string; bytes:number; createdAt:string; updatedAt:string };
+    type MediaAsset = { id:string; objectKey:string; publicUrl:string; originalFilename:string; altText:string; contentType:string; bytes:number; createdAt:string; updatedAt:string };
     type ApiResult<T> = { ok:true; data:T } | { ok:false; error:{ code:string; message:string; fields?:Record<string,string> } };
     const grid = document.querySelector<HTMLElement>('[data-media-grid]')!;
     const empty = document.querySelector<HTMLElement>('[data-media-empty]')!;
     const status = document.querySelector<HTMLElement>('[data-media-status]')!;
     const count = document.querySelector<HTMLElement>('[data-media-count]')!;
     const form = document.querySelector<HTMLFormElement>('[data-upload-form]')!;
+    const uploadModal = document.querySelector<HTMLElement>('[data-upload-modal]')!;
     const fileInput = document.querySelector<HTMLInputElement>('[data-file-input]')!;
+    const uploadPreview = document.querySelector<HTMLImageElement>('[data-upload-preview]')!;
+    const uploadFilename = document.querySelector<HTMLInputElement>('[data-file-input]')!.form?.querySelector<HTMLInputElement>('[name="filename"]')!;
+    const uploadInfo = document.querySelector<HTMLElement>('[data-upload-info]')!;
     const uploadButton = document.querySelector<HTMLButtonElement>('[data-upload-button]')!;
     const search = document.querySelector<HTMLInputElement>('[data-search]')!;
     const detail = document.querySelector<HTMLElement>('[data-detail-panel]')!;
     const detailImage = document.querySelector<HTMLImageElement>('[data-detail-image]')!;
-    const detailName = document.querySelector<HTMLElement>('[data-detail-name]')!;
     const detailInfo = document.querySelector<HTMLElement>('[data-detail-info]')!;
+    const detailPath = document.querySelector<HTMLElement>('[data-detail-path]')!;
     const detailAlt = document.querySelector<HTMLInputElement>('[data-detail-alt]')!;
+    const detailFilename = document.querySelector<HTMLInputElement>('[data-detail-filename]')!;
     let items: MediaAsset[] = [];
     let selected: MediaAsset | null = null;
+    let uploadPreviewUrl = '';
+
+    const clearUploadPreview = () => {
+      if (uploadPreviewUrl) URL.revokeObjectURL(uploadPreviewUrl);
+      uploadPreviewUrl = '';
+      uploadPreview.hidden = true;
+      uploadPreview.removeAttribute('src');
+      uploadInfo.hidden = true;
+      uploadInfo.textContent = '';
+    };
+    const closeUploadModal = () => { uploadModal.hidden = true; form.reset(); clearUploadPreview(); uploadButton.disabled = true; };
 
     const formatBytes = (bytes:number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
     const escape = (value:string) => value.replace(/[&<>'"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[character]!));
     const request = async <T,>(url:string, init?:RequestInit) => {
       const response = await fetch(url, init);
-      const result = await response.json() as ApiResult<T>;
+      const raw = await response.text();
+      let result: ApiResult<T>;
+      try {
+        result = JSON.parse(raw) as ApiResult<T>;
+      } catch {
+        throw new Error('관리자 API 응답이 HTML입니다. Astro 개발 서버가 아닌 Cloudflare Pages 개발 서버에서 실행하거나, Pages Functions를 포함해 다시 배포해 주세요.');
+      }
       if (!result.ok) throw new Error(result.error.message);
       return result.data;
     };
     const render = () => {
-      grid.innerHTML = items.map((item) => `<button class="media-card" type="button" data-media-id="${item.id}"><img src="${item.publicUrl}" alt="${escape(item.altText)}" loading="lazy" /><span><strong>${escape(item.originalFilename)}</strong><small>${formatBytes(item.bytes)} · ${new Date(item.createdAt).toLocaleDateString('ko-KR')}</small></span></button>`).join('');
+      grid.innerHTML = items.map((item) => `<button class="apple-media-card" type="button" data-media-id="${item.id}"><img src="${item.publicUrl}" alt="${escape(item.altText)}" loading="lazy" /><span><strong>${escape(item.originalFilename)}</strong><small>${formatBytes(item.bytes)} · ${new Date(item.createdAt).toLocaleDateString('ko-KR')}</small></span></button>`).join('');
       empty.hidden = items.length > 0;
       count.textContent = `${items.length} ${items.length === 1 ? 'image' : 'images'}`;
     };
@@ -111,7 +146,21 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       window.setTimeout(() => { status.textContent = ''; }, 1800);
     };
 
-    fileInput.addEventListener('change', () => { uploadButton.disabled = !fileInput.files?.length; });
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files?.[0];
+      uploadButton.disabled = !file;
+      clearUploadPreview();
+      if (!file || !file.type.startsWith('image/')) return;
+      uploadPreviewUrl = URL.createObjectURL(file);
+      uploadPreview.src = uploadPreviewUrl;
+      uploadPreview.hidden = false;
+      uploadFilename.value = file.name;
+      uploadInfo.textContent = `${file.name} · ${formatBytes(file.size)} · ${file.type || '알 수 없는 형식'}`;
+      uploadInfo.hidden = false;
+    });
+    document.querySelector('[data-upload-open]')?.addEventListener('click', () => { uploadModal.hidden = false; });
+    document.querySelector('[data-upload-close]')?.addEventListener('click', closeUploadModal);
+    uploadModal.addEventListener('click', (event) => { if (event.target === uploadModal) closeUploadModal(); });
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       uploadButton.disabled = true;
@@ -120,6 +169,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         const asset = await request<MediaAsset>('/api/admin/media', { method:'POST', body:new FormData(form) });
         items.unshift(asset);
         form.reset();
+        clearUploadPreview();
+        uploadModal.hidden = true;
         render();
         status.textContent = '이미지를 추가했습니다.';
       } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '이미지를 업로드하지 못했습니다.'; }
@@ -132,20 +183,21 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       selected = item;
       detailImage.src = item.publicUrl;
       detailImage.alt = item.altText;
-      detailName.textContent = item.originalFilename;
+      detailFilename.value = item.originalFilename;
       detailInfo.textContent = `${formatBytes(item.bytes)} · ${new Date(item.createdAt).toLocaleDateString('ko-KR')}`;
+      detailPath.textContent = `R2 / ${item.objectKey}`;
       detailAlt.value = item.altText;
       detail.hidden = false;
     });
     grid.addEventListener('error', (event) => {
       const image = event.target;
       if (!(image instanceof HTMLImageElement)) return;
-      image.closest('.media-card')?.classList.add('is-broken');
+      image.closest('.apple-media-card')?.classList.add('is-broken');
       image.alt = '이미지 미리보기를 불러오지 못했습니다.';
       status.textContent = '일부 이미지 미리보기를 불러오지 못했습니다.';
     }, true);
     detailImage.addEventListener('error', () => {
-      detailImage.closest('.media-detail-preview')?.classList.add('is-broken');
+      detailImage.closest('.apple-media-detail-preview')?.classList.add('is-broken');
       detailImage.alt = '이미지 미리보기를 불러오지 못했습니다.';
       status.textContent = '이미지 미리보기를 불러오지 못했습니다.';
     });
@@ -155,11 +207,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     detailAlt.addEventListener('change', async () => {
       if (!selected) return;
       try {
-        const data = await request<{ id:string; altText:string }>(`/api/admin/media/${selected.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ alt:detailAlt.value }) });
-        selected.altText = data.altText;
-        items = items.map((item) => item.id === data.id ? { ...item, altText:data.altText } : item);
+        const data = await request<{ id:string; altText?:string }>(`/api/admin/media/${selected.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ alt:detailAlt.value }) });
+        selected.altText = data.altText ?? selected.altText;
+        items = items.map((item) => item.id === data.id ? { ...item, altText:data.altText ?? item.altText } : item);
         render();
         status.textContent = '대체 텍스트를 저장했습니다.';
+      } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '저장하지 못했습니다.'; }
+    });
+    detailFilename.addEventListener('change', async () => {
+      if (!selected || !detailFilename.value.trim()) return;
+      try {
+        const data = await request<{ id:string; filename?:string }>(`/api/admin/media/${selected.id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ filename:detailFilename.value }) });
+        const filename = data.filename ?? selected.originalFilename;
+        selected.originalFilename = filename;
+        items = items.map((item) => item.id === data.id ? { ...item, originalFilename:filename } : item);
+        render();
+        status.textContent = '파일 이름을 저장했습니다.';
       } catch (cause) { status.textContent = cause instanceof Error ? cause.message : '저장하지 못했습니다.'; }
     });
     document.querySelector('[data-delete-image]')?.addEventListener('click', async () => {
@@ -177,4 +240,95 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     search.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(() => load(search.value), 250); });
     load();
   </script>
+
+  <style is:global>
+    /* Airbnb system override: the media library is a photo-first asset marketplace. */
+    .apple-media-page{color:#222;font-family:"Airbnb Cereal VF",Circular,-apple-system,system-ui,sans-serif}.apple-media-global-nav{height:80px;background:#fff;border-bottom:1px solid #ddd;color:#222}.apple-media-global-nav-inner{max-width:1280px;padding:0 24px}.apple-media-brand{color:#ff385c;font-size:16px;font-weight:700}.apple-media-global-link{color:#222;font-size:14px;font-weight:500}.apple-media-sub-nav{position:static;height:64px;padding:0 max(24px,calc((100vw - 1280px)/2));background:#fff;border-bottom:1px solid #ebebeb;backdrop-filter:none}.apple-media-sub-nav>span{font-size:16px;letter-spacing:0}.apple-media-sub-nav a{color:#ff385c}.apple-media-upload-tile{padding:64px 24px;background:#fff}.apple-media-upload{max-width:1280px;border-color:#ddd;border-radius:14px}.apple-media-dropzone{min-height:190px}.apple-media-dropzone-icon{background:#f2f2f2}.apple-media-upload-fields input,.apple-media-detail-alt input,.apple-media-search input{border-radius:8px;font-family:inherit}.apple-media-primary-button{border-radius:8px;background:#ff385c;font-family:inherit;font-size:16px;font-weight:500}.apple-media-primary-button:active{background:#e00b41;transform:none}.apple-media-library{max-width:1280px;padding:40px 24px 72px}.apple-media-grid{gap:16px}.apple-media-card{border-radius:14px}.apple-media-card>span{padding-top:12px}.apple-media-card strong{font-family:inherit;font-size:16px}.apple-media-detail{border-left-color:#ddd}.apple-media-detail-actions button:first-child{border-color:#222;color:#222;font-family:inherit}.apple-media-delete{color:#c13515;font-family:inherit}@media(max-width:744px){.apple-media-global-nav{height:64px}.apple-media-global-nav-inner,.apple-media-sub-nav{padding:0 20px}.apple-media-upload-tile{padding:32px 20px}.apple-media-library{padding:32px 20px 56px}}
+    .apple-media-page { background:#fff; color:#1d1d1f; font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
+    .apple-media-global-nav { height:44px; background:#000; color:#fff; }
+    .apple-media-global-nav-inner { display:flex; align-items:center; justify-content:space-between; max-width:980px; height:100%; margin:auto; padding:0 24px; }
+    .apple-media-brand,.apple-media-global-link { color:#fff; font-size:12px; line-height:1; letter-spacing:-.12px; }
+    .apple-media-brand { font-weight:600; }
+    .apple-media-global-link { opacity:.88; }
+    .apple-media { max-width:none; padding:0; }
+    .apple-media-sub-nav { position:sticky; z-index:10; top:0; display:flex; align-items:center; justify-content:space-between; height:52px; padding:0 max(24px,calc((100vw - 980px)/2)); border-bottom:1px solid rgba(0,0,0,.08); background:rgba(245,245,247,.82); backdrop-filter:saturate(180%) blur(20px); }
+    .apple-media-sub-nav>span { font-size:21px; font-weight:600; letter-spacing:.23px; }
+    .apple-media-sub-nav>div { display:flex; align-items:center; gap:18px; }
+    .apple-media-sub-nav p { margin:0; color:#7a7a7a; font-size:12px; letter-spacing:-.12px; }
+    .apple-media-sub-nav a { color:#0066cc; font-size:14px; letter-spacing:-.224px; }
+    .apple-media-upload-tile { padding:80px 24px; background:#f5f5f7; text-align:center; }
+    .apple-media-upload { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,360px); max-width:980px; margin:auto; overflow:hidden; border:1px solid #e0e0e0; border-radius:18px; background:#fff; text-align:left; }
+    .apple-media-dropzone { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; padding:24px; cursor:pointer; }
+    .apple-media-dropzone-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:12px; border-radius:50%; background:rgba(210,210,215,.64); font-size:20px; }
+    .apple-media-dropzone strong { font-size:17px; font-weight:600; letter-spacing:-.374px; }
+    .apple-media-dropzone small { margin-top:5px; color:#7a7a7a; font-size:14px; letter-spacing:-.224px; }
+    .apple-media-upload-fields { display:flex; flex-direction:column; justify-content:center; gap:16px; padding:32px; border-left:1px solid #e0e0e0; }
+    .apple-media-upload-fields input,.apple-media-detail-alt input { box-sizing:border-box; width:100%; height:44px; padding:12px 20px; border:1px solid rgba(0,0,0,.08); border-radius:9999px; background:#fff; color:#1d1d1f; font:400 17px/1.47 system-ui,-apple-system,sans-serif; letter-spacing:-.374px; outline:none; }
+    .apple-media-upload-fields input:focus,.apple-media-detail-alt input:focus { border-color:#0071e3; outline:2px solid #0071e3; outline-offset:2px; }
+    .apple-media-primary-button { min-height:44px; border:0; border-radius:9999px; background:#0066cc; color:#fff; padding:11px 22px; font:400 17px/1 system-ui,-apple-system,sans-serif; cursor:pointer; }
+    .apple-media-primary-button:active { transform:scale(.95); }
+    .apple-media-primary-button:disabled { opacity:.45; cursor:not-allowed; }
+    .apple-media-upload-tile>p { margin:16px 0 0; color:#7a7a7a; font-size:12px; letter-spacing:-.12px; }
+    .apple-media-library { max-width:1440px; margin:auto; padding:48px 24px 80px; }
+    .apple-media-toolbar { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:32px; }
+    .apple-media-search { width:min(100%,380px); }
+    .apple-media-search input { box-sizing:border-box; width:100%; height:44px; padding:12px 20px; border:1px solid rgba(0,0,0,.08); border-radius:9999px; background:#fff; color:#1d1d1f; font:400 17px/1.47 system-ui,-apple-system,sans-serif; letter-spacing:-.374px; outline:none; }
+    .apple-media-search input:focus { border-color:#0071e3; outline:2px solid #0071e3; outline-offset:2px; }
+    .apple-media-toolbar-status p { margin:0; color:#7a7a7a; font-size:14px; letter-spacing:-.224px; }
+    .apple-media-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; }
+    .apple-media-card { min-width:0; border:0; border-radius:18px; background:#fff; padding:0; text-align:left; color:#1d1d1f; cursor:pointer; overflow:hidden; }
+    .apple-media-card>img { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#f5f5f7; }
+    .apple-media-card>span { display:block; padding:14px 2px 4px; }
+    .apple-media-card strong,.apple-media-card small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .apple-media-card strong { font-size:14px; font-weight:600; letter-spacing:-.224px; }
+    .apple-media-card small { margin-top:5px; color:#7a7a7a; font-size:12px; letter-spacing:-.12px; }
+    .apple-media-card:focus-visible { outline:2px solid #0071e3; outline-offset:3px; }
+    .apple-media-empty { padding:80px 24px; background:#f5f5f7; text-align:center; }
+    .apple-media-empty strong { font-size:21px; font-weight:600; letter-spacing:.231px; }
+    .apple-media-empty p { margin:8px 0 0; font-size:17px; letter-spacing:-.374px; }
+    .apple-media-detail { position:fixed; z-index:30; inset:0 0 0 auto; width:min(540px,100vw); border-left:1px solid #e0e0e0; background:#fff; overflow-y:auto; }
+    .apple-media-detail[hidden] { display:none; }
+    .apple-media-detail-close { position:absolute; z-index:1; top:20px; right:20px; display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:50%; background:rgba(210,210,215,.64); color:#1d1d1f; font-size:27px; font-weight:300; cursor:pointer; }
+    .apple-media-detail-preview { display:grid; min-height:380px; place-items:center; background:#f5f5f7; }
+    .apple-media-detail-preview img { display:block; width:100%; max-height:520px; object-fit:contain; }
+    .apple-media-detail-copy { padding:32px; }
+    .apple-media-detail-copy h2 { margin:0; font-size:28px; font-weight:600; line-height:1.14; letter-spacing:.196px; word-break:break-all; }
+    .apple-media-detail-info { margin:8px 0 32px; color:#7a7a7a; font-size:14px; letter-spacing:-.224px; }
+    .apple-media-detail-alt { display:block; color:#333; font-size:14px; font-weight:600; letter-spacing:-.224px; }
+    .apple-media-detail-alt input { margin-top:8px; }
+    .apple-media-detail-actions { display:grid; grid-template-columns:1fr 1.3fr; gap:12px; margin-top:24px; }
+    .apple-media-detail-actions button:first-child { min-height:44px; border:1px solid #0066cc; border-radius:9999px; background:#fff; color:#0066cc; font:400 17px/1 system-ui,-apple-system,sans-serif; cursor:pointer; }
+    .apple-media-delete { width:100%; margin-top:48px; border:0; background:transparent; color:#0066cc; font:400 14px/1.29 system-ui,-apple-system,sans-serif; cursor:pointer; }
+    .apple-media-card.is-broken { position:relative; background:#f5f5f7; }
+    .apple-media-card.is-broken::after { content:'미리보기를 불러오지 못했습니다'; position:absolute; inset:0; display:grid; place-items:center; padding:24px; color:#7a7a7a; font-size:14px; text-align:center; }
+    .apple-media-card.is-broken>img,.apple-media-detail-preview.is-broken img { visibility:hidden; }
+    .apple-media-detail-preview.is-broken::after { content:'이미지 미리보기를 불러오지 못했습니다'; color:#7a7a7a; font-size:14px; }
+    @media (max-width:1068px) { .apple-media-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:833px) { .apple-media-upload { grid-template-columns:1fr; } .apple-media-upload-fields { border-top:1px solid #e0e0e0; border-left:0; } .apple-media-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:640px) { .apple-media-global-nav-inner { padding:0 20px; } .apple-media-sub-nav { padding:0 20px; } .apple-media-sub-nav>span { font-size:17px; } .apple-media-sub-nav p { display:none; } .apple-media-upload-tile { padding:48px 20px; } .apple-media-library { padding:32px 20px 64px; } .apple-media-toolbar { margin-bottom:24px; } .apple-media-grid { gap:16px; } .apple-media-detail-copy { padding:24px 20px; } .apple-media-detail-preview { min-height:280px; } }
+  </style>
+  <style is:global>
+    .apple-media-page .site-header{max-width:none}
+    .apple-media-page .apple-media{max-width:1280px;padding:0 24px 80px;margin:auto}
+    .apple-media-page .apple-media-sub-nav{height:auto;padding:40px 0 20px;border:0;background:#fff}
+    .apple-media-page .apple-media-sub-nav>span{font-size:28px;font-weight:700;letter-spacing:-.04em}
+    .apple-media-page .apple-media-logout{display:inline-flex;align-items:center;min-height:36px;color:#6a6a6a;font-size:14px;text-decoration:none}
+    .apple-media-page .apple-media-logout:hover{text-decoration:underline}
+    .apple-media-page .apple-media-upload-tile{padding:0 0 40px;background:#fff;text-align:left}
+    .apple-media-page .apple-media-upload{max-width:none;border-radius:14px}
+    .apple-media-page .apple-media-upload-modal{position:fixed;z-index:40;inset:0;display:grid;place-items:center;padding:24px;background:rgba(0,0,0,.5)}
+    .apple-media-page .apple-media-upload-modal[hidden]{display:none}
+    .apple-media-page .apple-media-upload-modal-card{position:relative;width:min(760px,100%);padding:52px 24px 24px;border-radius:18px;background:#fff}
+    .apple-media-page .apple-media-upload-close{position:absolute;top:14px;right:14px;width:36px;height:36px;border:0;border-radius:50%;background:#f2f2f2;font-size:24px;cursor:pointer}
+    .apple-media-page .apple-media-dropzone{position:relative;overflow:hidden}
+    .apple-media-page .apple-media-upload-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#f7f7f7}
+    .apple-media-page .apple-media-upload-info{position:absolute;right:16px;bottom:16px;left:16px;z-index:1;overflow:hidden;border-radius:8px;background:rgba(34,34,34,.78);padding:10px 12px;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+    .apple-media-page .apple-media-dropzone:has(.apple-media-upload-preview:not([hidden]))>.apple-media-dropzone-icon,.apple-media-page .apple-media-dropzone:has(.apple-media-upload-preview:not([hidden]))>strong,.apple-media-page .apple-media-dropzone:has(.apple-media-upload-preview:not([hidden]))>small{display:none}
+    .apple-media-page .apple-media-library{max-width:none;padding:0}
+    .apple-media-page .apple-media-toolbar{padding:18px 0 28px}
+    .apple-media-page .apple-media-grid{gap:16px}
+    .apple-media-page .apple-media-card{border-radius:14px}
+    .apple-media-page .apple-media-detail-path{margin:0 0 28px;overflow-wrap:anywhere;color:#6a6a6a;font-size:13px}
+    @media(max-width:744px){.apple-media-page .apple-media{padding:0 20px 56px}.apple-media-page .apple-media-sub-nav{padding:28px 0 16px}.apple-media-page .apple-media-sub-nav>span{font-size:24px}.apple-media-page .apple-media-upload{border-radius:14px}}
+  </style>
 </BaseLayout>
