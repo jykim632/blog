@@ -1,11 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import SiteHeader from '../../components/SiteHeader.astro';
+import AdminSidebar from '../../components/admin/AdminSidebar.astro';
 import MediaDetailField from '../../components/admin/MediaDetailField.astro';
 ---
 
 <BaseLayout title="이미지 관리 — 파랑새들의 둥지" description="블로그 이미지 관리 화면" bodyClass="apple-media-page">
-  <SiteHeader />
+  <AdminSidebar active="media" />
 
   <main class="apple-media" id="top">
     <header class="apple-media-sub-nav">
