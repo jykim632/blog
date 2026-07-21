@@ -5,10 +5,10 @@
   "type": "module",
   "packageManager": "pnpm@10.11.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "pnpm build && pnpm db:migrate:local && wrangler dev --config dist/server/wrangler.json --env-file .dev.vars --persist-to .wrangler/state --port 4321",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "cf:dev": "wrangler dev --config dist/server/wrangler.json",
+    "cf:dev": "wrangler dev --config dist/server/wrangler.json --env-file .dev.vars --persist-to .wrangler/state",
     "deploy": "wrangler deploy --config dist/server/wrangler.json",
     "db:migrate:local": "wrangler d1 migrations apply blog --local",
     "db:migrate:remote": "wrangler d1 migrations apply blog --remote",

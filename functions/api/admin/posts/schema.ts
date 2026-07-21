@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const postIdSchema = z.string().uuid();
+// New posts use UUIDs, while local samples and imported posts may use readable IDs.
+export const postIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(100)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 export const postStatusSchema = z.enum(["draft", "published", "archived"]);
 export const postTitleSchema = z.string().trim().min(1).max(90);
 export const postSummarySchema = z.string().trim().max(240).default("");

@@ -11,13 +11,13 @@ pnpm install
 pnpm dev
 ```
 
-개발 서버는 기본적으로 `http://localhost:4321`에서 실행됩니다.
+개발 서버는 Cloudflare Worker와 로컬 D1을 함께 실행하고 필요한 D1 마이그레이션을 적용하며, 기본 주소는 `http://localhost:4321`입니다.
 
 ## 명령어
 
 | 명령어 | 설명 |
 | --- | --- |
-| `pnpm dev` | 로컬 개발 서버 실행 |
+| `pnpm dev` | Cloudflare Worker와 로컬 D1을 포함한 로컬 개발 서버 실행 (`localhost:4321`) |
 | `pnpm build` | 타입 검사 후 Cloudflare Worker 빌드 |
 | `pnpm preview` | 빌드 결과 미리 보기 |
 | `pnpm cf:dev` | 빌드한 Cloudflare Worker 및 로컬 D1 환경에서 결과 확인 |
@@ -47,6 +47,10 @@ docs/               로드맵 및 API·DB 설계 문서
 Cloudflare Workers는 `pnpm build` 결과물인 `dist/`의 Astro Worker를 배포합니다. 배포 설정은 `wrangler.jsonc`에 있습니다. 공개 목록과 상세 페이지는 Worker에서 D1의 `published` 글만 조회해 렌더링하고, 정적 CSS·JavaScript·이미지는 Cloudflare Assets로 제공됩니다.
 
 배포 전에는 `pnpm build` 후 `pnpm cf:dev`로 Worker와 로컬 D1 binding을 함께 확인하세요. 배포 명령은 `pnpm deploy`입니다.
+
+## 로컬 관리자
+
+`cp .dev.vars.example .dev.vars`를 한 번 실행한 뒤 `pnpm dev`로 서버를 시작하면 `http://localhost:4321/admin/posts`에서 Cloudflare Access 로그인 없이 관리자 화면을 사용할 수 있습니다. 이 bypass는 `.dev.vars`의 `LOCAL_ADMIN_BYPASS=true`와 `localhost`/`127.0.0.1` 요청이 모두 충족될 때만 동작하며, 배포 Worker에서는 Cloudflare Access 검증이 계속 적용됩니다.
 
 ## 이미지 관리
 
