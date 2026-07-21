@@ -1,14 +1,27 @@
 ---
+interface Props {
+  variant?: 'blog' | 'admin';
+  activeAdmin?: 'posts' | 'media';
+}
+
+const { variant = 'blog', activeAdmin } = Astro.props;
 const isPostsPage = Astro.url.pathname.startsWith('/posts');
 const isAboutPage = Astro.url.pathname === '/about';
 ---
 
 <header class="site-header">
   <a class="wordmark" href="/" aria-label="파랑새들의 둥지 홈"><img src="/images/bluebirds-mark.png" alt="파랑새들의 둥지" width="32" height="32" /></a>
-  <nav aria-label="주요 메뉴">
-    <a href="/posts" class:list={{ active: isPostsPage }}>글</a>
-    <a href="/about" class:list={{ active: isAboutPage }}>소개</a>
-  </nav>
+  {variant === 'admin' ? (
+    <nav aria-label="관리자 메뉴">
+      <a href="/admin/posts" class:list={{ active: activeAdmin === 'posts' }} aria-current={activeAdmin === 'posts' ? 'page' : undefined}>글 관리</a>
+      <a href="/admin/media" class:list={{ active: activeAdmin === 'media' }} aria-current={activeAdmin === 'media' ? 'page' : undefined}>이미지 관리</a>
+    </nav>
+  ) : (
+    <nav aria-label="주요 메뉴">
+      <a href="/posts" class:list={{ active: isPostsPage }}>글</a>
+      <a href="/about" class:list={{ active: isAboutPage }}>소개</a>
+    </nav>
+  )}
 </header>
 
 <style is:global>

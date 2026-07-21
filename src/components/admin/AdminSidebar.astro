@@ -1,17 +1,12 @@
 ---
+import SiteHeader from '../SiteHeader.astro';
+
 interface Props { active: 'posts' | 'media'; }
 const { active } = Astro.props;
 ---
 
-<header class="site-header admin-header">
-  <a class="wordmark" href="/" aria-label="파랑새들의 둥지 홈"><img src="/images/bluebirds-mark.png" alt="파랑새들의 둥지" width="32" height="32" /></a>
-  <nav aria-label="관리자 메뉴">
-    <a href="/admin/posts" aria-current={active === 'posts' ? 'page' : undefined}>글 관리</a>
-    <a href="/admin/media" aria-current={active === 'media' ? 'page' : undefined}>이미지 관리</a>
-  </nav>
-  <div class="site-header-actions"><a href="/cdn-cgi/access/logout">로그아웃</a></div>
-</header>
+<SiteHeader variant="admin" activeAdmin={active} />
 
 <style is:global>
-  .admin-shell{min-height:100vh;background:#fff}.admin-header nav a{position:relative;display:flex;align-items:center;height:80px;padding:0;border-bottom:0!important}.admin-header nav a[aria-current]{color:var(--bnb-ink);font-weight:600}.admin-header nav a[aria-current]::after{position:absolute;right:0;bottom:0;left:0;height:2px;background:var(--bnb-ink);content:""}@media(max-width:744px){.admin-header nav a{height:64px}.admin-header nav a[aria-current]::after{display:none}}
+  .admin-shell{min-height:100vh;background:#fff}
 </style>
