@@ -3,7 +3,21 @@ import { error } from './api';
 type AccessJwk = JsonWebKey & { kid?: string };
 
 interface AccessEnvironment {
+  MEDIA_ACCESS_AUD?: string;
   MEDIA_ACCESS_EMAIL?: string;
+  MEDIA_ACCESS_TEAM_DOMAIN?: string;
+}
+
+export function shouldBypassLocalAdmin(request: Request, env: AccessEnvironment): boolean {
+  const clientAddress = request.headers.get('cf-connecting-ip');
+  if (clientAddress === '127.0.0.1' || clientAddress === '::1') return true;
+
+  const hostname = request.headers.get('Host')?.split(':', 1)[0] ?? new URL(request.url).hostname;
+  return hostname === 'localhost' || hostname === '127.0.0.1';
+}
+
+interface AccessLoginEnvironment {
+  MEDIA_ACCESS_AUD?: string;
   MEDIA_ACCESS_TEAM_DOMAIN?: string;
 }
 
@@ -18,7 +32,7 @@ function decodeJson<T>(value: string): T {
 }
 
 export async function verifyAccess(request: Request, env: AccessEnvironment): Promise<Response | null> {
-  if (!env.MEDIA_ACCESS_EMAIL || !env.MEDIA_ACCESS_TEAM_DOMAIN) {
+  if (!env.MEDIA_ACCESS_AUD || !env.MEDIA_ACCESS_EMAIL || !env.MEDIA_ACCESS_TEAM_DOMAIN) {
     return error(503, 'AUTH_CONFIGURATION_ERROR', '관리자 인증 설정이 완료되지 않았습니다.');
   }
 
@@ -32,11 +46,13 @@ export async function verifyAccess(request: Request, env: AccessEnvironment): Pr
 
   try {
     const header = decodeJson<{ alg?: string; kid?: string }>(encodedHeader);
-    const payload = decodeJson<{ email?: string; exp?: number; iss?: string }>(encodedPayload);
+    const payload = decodeJson<{ aud?: string | string[]; email?: string; exp?: number; iss?: string }>(encodedPayload);
     const accessDomain = env.MEDIA_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
+    const audience = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
     if (
       header.alg !== 'RS256'
       || !header.kid
+      || !audience.includes(env.MEDIA_ACCESS_AUD)
       || !payload.exp
       || payload.exp * 1000 <= Date.now()
       || payload.iss !== accessDomain
@@ -70,4 +86,17 @@ export async function verifyAccess(request: Request, env: AccessEnvironment): Pr
   } catch {
     return error(401, 'UNAUTHENTICATED', '인증 정보를 확인할 수 없습니다.');
   }
+}
+
+export function getAccessLoginUrl(request: Request, env: AccessLoginEnvironment): string | null {
+  if (!env.MEDIA_ACCESS_AUD || !env.MEDIA_ACCESS_TEAM_DOMAIN) return null;
+
+  const requestUrl = new URL(request.url);
+  const accessDomain = env.MEDIA_ACCESS_TEAM_DOMAIN.replace(/\/$/, '');
+  const loginUrl = new URL(`/cdn-cgi/access/login/${requestUrl.hostname}`, accessDomain);
+  loginUrl.search = new URLSearchParams({
+    kid: env.MEDIA_ACCESS_AUD,
+    redirect_url: `${requestUrl.pathname}${requestUrl.search}`,
+  }).toString();
+  return loginUrl.toString();
 }
