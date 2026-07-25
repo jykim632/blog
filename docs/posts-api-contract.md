@@ -79,7 +79,7 @@ HTTP status still carries transport meaning, while the JSON body retains the uni
 }
 ```
 
-The API accepts a JSON document, validates the allowed node/mark set, serializes it into `posts.content_json`, and derives `content_text`. Clients never send rendered HTML as the stored source of truth.
+The API accepts a JSON document, validates the allowed node/mark set, serializes it into `posts.content_json`, and derives `content_text`. Clients never send rendered HTML as the stored source of truth. The allowlist includes `image` nodes with a valid absolute `src` URL and an `alt` string of up to 240 characters, plus `link` marks with an absolute `href`; public rendering emits semantic image figures and safe links.
 
 ## Admin endpoints
 

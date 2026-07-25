@@ -28,7 +28,7 @@ export type TiptapNode = {
   type: string;
   text?: string;
   attrs?: Record<string, unknown>;
-  marks?: Array<{ type: string }>;
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
   content?: TiptapNode[];
 };
 
@@ -47,8 +47,9 @@ const blockTypes = new Set([
   "listItem",
   "codeBlock",
   "horizontalRule",
+  "image",
 ]);
-const markTypes = new Set(["bold", "italic", "strike", "code"]);
+const markTypes = new Set(["bold", "italic", "strike", "code", "link"]);
 
 function isTiptapNode(value: unknown, depth = 0): value is TiptapNode {
   if (depth > 12 || !value || typeof value !== "object" || Array.isArray(value))
@@ -57,6 +58,16 @@ function isTiptapNode(value: unknown, depth = 0): value is TiptapNode {
   if (
     typeof node.type !== "string" ||
     (!inlineTypes.has(node.type) && !blockTypes.has(node.type))
+  )
+    return false;
+  if (
+    node.marks?.some(
+      (mark) =>
+        mark.type === "link" &&
+        (!mark.attrs ||
+          typeof mark.attrs.href !== "string" ||
+          !z.url().safeParse(mark.attrs.href).success),
+    )
   )
     return false;
   if (
@@ -73,6 +84,17 @@ function isTiptapNode(value: unknown, depth = 0): value is TiptapNode {
       ))
   )
     return false;
+  if (node.type === "image") {
+    const attrs = node.attrs as Record<string, unknown> | undefined;
+    if (
+      !attrs ||
+      typeof attrs.src !== "string" ||
+      !z.url().safeParse(attrs.src).success ||
+      typeof attrs.alt !== "string" ||
+      attrs.alt.length > 240
+    )
+      return false;
+  }
   if (
     node.marks &&
     (!Array.isArray(node.marks) ||

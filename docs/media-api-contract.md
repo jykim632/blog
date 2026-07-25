@@ -15,6 +15,7 @@ The browser never receives R2 credentials. Pages Functions use the `MEDIA_BUCKET
 Every request requires a valid Cloudflare Access JWT. Configure the following runtime values after creating the Access application:
 
 - `MEDIA_ACCESS_TEAM_DOMAIN`: `https://long-disk-2ff5.cloudflareaccess.com`
+- `MEDIA_ACCESS_AUD`: the Audience (AUD) value for the Self-hosted Access application (include both production and development admin hostnames in that application)
 - `MEDIA_ACCESS_EMAIL`: the permitted administrator email address
 - `MEDIA_PUBLIC_URL`: `https://media.bluebirds.cloud`
 

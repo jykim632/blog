@@ -6,11 +6,14 @@
   "packageManager": "pnpm@10.11.1",
   "scripts": {
     "dev": "pnpm build && pnpm db:migrate:local && wrangler dev --config dist/server/wrangler.json --env-file .dev.vars --persist-to .wrangler/state --port 4321",
+    "build:develop": "CLOUDFLARE_ENV=develop astro check && CLOUDFLARE_ENV=develop astro build && node scripts/prepare-develop-worker-config.mjs",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "cf:dev": "wrangler dev --config dist/server/wrangler.json --env-file .dev.vars --persist-to .wrangler/state",
-    "deploy": "wrangler deploy --config dist/server/wrangler.json",
+    "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
+    "deploy:develop": "pnpm run build:develop && wrangler deploy --config dist/server/wrangler.json",
     "db:migrate:local": "wrangler d1 migrations apply blog --local",
+    "db:migrate:develop": "wrangler d1 migrations apply blog-develop --remote --env develop",
     "db:migrate:remote": "wrangler d1 migrations apply blog --remote",
     "db:import:legacy": "node scripts/import-legacy-posts.mjs"
   },

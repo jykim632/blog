@@ -15,6 +15,10 @@ function renderText(node: TiptapNode): string {
     if (mark.type === 'italic') html = `<em>${html}</em>`;
     if (mark.type === 'strike') html = `<s>${html}</s>`;
     if (mark.type === 'code') html = `<code>${html}</code>`;
+    if (mark.type === 'link') {
+      const href = typeof mark.attrs?.href === 'string' ? mark.attrs.href : '';
+      html = `<a href="${escapeHtml(href)}" rel="noreferrer">${html}</a>`;
+    }
   }
   return html;
 }
@@ -35,6 +39,12 @@ function renderNode(node: TiptapNode): string {
   if (node.type === 'listItem') return `<li>${content}</li>`;
   if (node.type === 'codeBlock') return `<pre><code>${content}</code></pre>`;
   if (node.type === 'horizontalRule') return '<hr>';
+  if (node.type === 'image') {
+    const attrs = node.attrs ?? {};
+    const src = typeof attrs.src === 'string' ? attrs.src : '';
+    const alt = typeof attrs.alt === 'string' ? attrs.alt : '';
+    return `<figure><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"><figcaption>${escapeHtml(alt)}</figcaption></figure>`;
+  }
   return '';
 }
 

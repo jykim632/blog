@@ -19,9 +19,11 @@ pnpm dev
 | --- | --- |
 | `pnpm dev` | Cloudflare Worker와 로컬 D1을 포함한 로컬 개발 서버 실행 (`localhost:4321`) |
 | `pnpm build` | 타입 검사 후 Cloudflare Worker 빌드 |
+| `pnpm run build:develop` | `develop` Worker 환경용 빌드 |
 | `pnpm preview` | 빌드 결과 미리 보기 |
 | `pnpm cf:dev` | 빌드한 Cloudflare Worker 및 로컬 D1 환경에서 결과 확인 |
 | `pnpm db:migrate:local` | 로컬 D1 마이그레이션 적용 |
+| `pnpm run db:migrate:develop` | 개발용 원격 D1 마이그레이션 적용 |
 | `pnpm db:migrate:remote` | 원격 D1 마이그레이션 적용 |
 
 ## 콘텐츠
@@ -44,14 +46,25 @@ docs/               로드맵 및 API·DB 설계 문서
 
 ## 배포
 
-Cloudflare Workers는 `pnpm build` 결과물인 `dist/`의 Astro Worker를 배포합니다. 배포 설정은 `wrangler.jsonc`에 있습니다. 공개 목록과 상세 페이지는 Worker에서 D1의 `published` 글만 조회해 렌더링하고, 정적 CSS·JavaScript·이미지는 Cloudflare Assets로 제공됩니다.
+Cloudflare Workers는 `pnpm build` 결과물인 `dist/`의 Astro Worker를 배포합니다. 배포 설정은 `wrangler.jsonc`에 있으며, `bluebirds.cloud`는 Worker Custom Domain으로 연결됩니다. 공개 목록과 상세 페이지는 Worker에서 D1의 `published` 글만 조회해 렌더링하고, 정적 CSS·JavaScript·이미지는 Cloudflare Assets로 제공됩니다.
 
-배포 전에는 `pnpm build` 후 `pnpm cf:dev`로 Worker와 로컬 D1 binding을 함께 확인하세요. 배포 명령은 `pnpm deploy`입니다.
+배포 전에는 `pnpm build` 후 `pnpm cf:dev`로 Worker와 로컬 D1 binding을 함께 확인하세요. 배포 명령은 `pnpm run deploy`입니다. Cloudflare Workers Builds를 연결하면 `main` 푸시가 이 명령과 같은 Worker 배포를 자동 실행합니다.
+
+## 개발 환경
+
+`develop` 브랜치는 운영 환경과 분리된 `https://develop.bluebirds.cloud` Worker에 배포합니다. 개발 전용 D1(`blog-develop`)과 R2(`bluebirds-media-develop`)를 사용하므로 글·이미지·마이그레이션이 운영 데이터에 영향을 주지 않습니다.
+
+```bash
+pnpm run db:migrate:develop
+pnpm run deploy:develop
+```
 
 ## 로컬 관리자
 
-`cp .dev.vars.example .dev.vars`를 한 번 실행한 뒤 `pnpm dev`로 서버를 시작하면 `http://localhost:4321/admin/posts`에서 Cloudflare Access 로그인 없이 관리자 화면을 사용할 수 있습니다. 이 bypass는 `.dev.vars`의 `LOCAL_ADMIN_BYPASS=true`와 `localhost`/`127.0.0.1` 요청이 모두 충족될 때만 동작하며, 배포 Worker에서는 Cloudflare Access 검증이 계속 적용됩니다.
+`pnpm dev`로 서버를 시작하면 `http://localhost:4321/admin/posts`에서 Cloudflare Access 로그인 없이 관리자 화면을 사용할 수 있습니다. 이 bypass는 Wrangler 로컬 Worker의 loopback 요청(`127.0.0.1` 또는 `::1`)에만 적용되며, 배포 Worker에서는 Cloudflare Access 검증이 계속 적용됩니다.
 
 ## 이미지 관리
 
-`/admin`은 로그인된 관리자만 `/admin/media`로 이동시키는 진입점이며, `/admin/media`는 이미지 관리 화면입니다. Cloudflare Access 애플리케이션에서 `/admin/*`와 `/api/admin/*`를 보호하면 비로그인 사용자는 Access 로그인 화면으로 이동하고, 로그인 후 원래 요청한 관리 화면으로 돌아옵니다. 이미지 원본은 R2에, 파일명·대체 텍스트·URL 등의 정보는 D1 `media_assets` 테이블에 저장합니다. 배포 전에 R2 binding `MEDIA_BUCKET`, D1 binding `DB`, 그리고 Access 환경값을 Cloudflare Worker에 설정해야 합니다. 상세한 API·설정 계약은 [이미지 API 문서](docs/media-api-contract.md)를 참고하세요.
+`/admin`은 로그인된 관리자만 `/admin/posts`로 이동시키는 진입점입니다. 비로그인 브라우저 요청은 Cloudflare Access 로그인 화면으로 이동하고, 로그인 후 원래 요청한 관리 화면으로 돌아옵니다. `/api/admin/*` 요청은 클라이언트가 오류를 판별할 수 있도록 JSON 오류 응답을 유지합니다.
+
+배포 전에는 Cloudflare Zero Trust에서 Self-hosted Access 애플리케이션을 만들고 `bluebirds.cloud/admin*`, `bluebirds.cloud/api/admin*`, `develop.bluebirds.cloud/admin*`, `develop.bluebirds.cloud/api/admin*`를 보호하세요. 그 애플리케이션의 Audience (AUD) 값을 `wrangler.jsonc`의 `MEDIA_ACCESS_AUD`에 입력해야 합니다. 또한 R2 binding `MEDIA_BUCKET`, D1 binding `DB`, 그리고 Access 환경값을 Cloudflare Worker에 설정해야 합니다. 상세한 API·설정 계약은 [이미지 API 문서](docs/media-api-contract.md)를 참고하세요.
