@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AdminSidebar from '../../../components/admin/AdminSidebar.astro';
+import PostEditor from '../../../components/admin/PostEditor.astro';
+---
+
+<BaseLayout title="새 글 — 파랑새들의 둥지" description="새 블로그 글을 작성하는 관리자 화면" bodyClass="admin-posts-page">
+  <main class="admin-shell"><AdminSidebar active="posts" /><PostEditor /></main>
+</BaseLayout>

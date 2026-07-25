@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AdminSidebar from '../../../components/admin/AdminSidebar.astro';
+import PostEditor from '../../../components/admin/PostEditor.astro';
+const { id } = Astro.params;
+---
+
+<BaseLayout title="글 편집 — 파랑새들의 둥지" description="블로그 글을 편집하는 관리자 화면" bodyClass="admin-posts-page">
+  <main class="admin-shell"><AdminSidebar active="posts" /><PostEditor postId={id} /></main>
+</BaseLayout>
