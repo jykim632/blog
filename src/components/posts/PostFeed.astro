@@ -12,9 +12,10 @@ interface Props {
   headingId?: string;
   id?: string;
   showSearch?: boolean;
+  showTags?: boolean;
 }
 
-const { posts, tags, title, variant, headingId, id, showSearch = true } = Astro.props;
+const { posts, tags, title, variant, headingId, id, showSearch = true, showTags = true } = Astro.props;
 const hasSidebar = Astro.slots.has('sidebar');
 ---
 
@@ -29,7 +30,7 @@ const hasSidebar = Astro.slots.has('sidebar');
     <span>{posts.length}개의 글</span>
   </header>
   {showSearch && <PostSearch className={variant === 'posts' ? 'posts-search' : 'journal-search'} />}
-  <TagFilter tags={tags} postCount={posts.length} />
+  {showTags && <TagFilter tags={tags} postCount={posts.length} />}
   {posts.length === 0 ? <p class="post-feed-empty">아직 공개된 글이 없습니다.</p> : hasSidebar ? (
     <div class="journal-content">
       <div class="post-grid">

@@ -2,12 +2,36 @@
 interface Props {
   tags: string[];
   postCount: number;
+  collapsible?: boolean;
+  initialTagCount?: number;
 }
 
-const { tags, postCount } = Astro.props;
+const { tags, postCount, collapsible = false, initialTagCount = 5 } = Astro.props;
+const hasHiddenTags = collapsible && tags.length > initialTagCount;
 ---
 
-<div class="post-tags" aria-label="글 태그">
+<div class:list={['post-tags', { 'post-tags--collapsible': collapsible }]} aria-label="글 태그" data-tag-list data-initial-tag-count={initialTagCount}>
   <button class="is-active" type="button" data-tag-filter="all" aria-pressed="true">전체 <span>{postCount}</span></button>
-  {tags.map((tag) => <button type="button" data-tag-filter={tag} aria-pressed="false">{tag}</button>)}
+  {tags.map((tag, index) => <button type="button" data-tag-filter={tag} aria-pressed="false" hidden={collapsible && index >= initialTagCount}>{tag}</button>)}
+  {hasHiddenTags && <button class="post-tags-toggle" type="button" data-tag-toggle aria-expanded="false" aria-label="태그 더 보기">+</button>}
 </div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tag-list]').forEach((tagList) => {
+    const toggle = tagList.querySelector<HTMLButtonElement>('[data-tag-toggle]');
+    if (!toggle) return;
+
+    const initialTagCount = Number(tagList.dataset.initialTagCount ?? 5);
+    const tags = Array.from(tagList.querySelectorAll<HTMLButtonElement>('[data-tag-filter]'));
+
+    toggle.addEventListener('click', () => {
+      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+      tags.slice(initialTagCount).forEach((tag) => {
+        tag.hidden = isExpanded;
+      });
+      toggle.setAttribute('aria-expanded', String(!isExpanded));
+      toggle.setAttribute('aria-label', isExpanded ? '태그 더 보기' : '태그 접기');
+      toggle.textContent = isExpanded ? '+' : '−';
+    });
+  });
+</script>
