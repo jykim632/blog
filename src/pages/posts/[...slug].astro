@@ -4,10 +4,15 @@ import SiteFooter from '../../components/SiteFooter.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { renderPostContent } from '../../lib/posts/render';
-import { getPublishedPostBySlug } from '../../../functions/api/admin/posts/repository';
+import { getPublishedPostBySlug, listPublishedPosts } from '../../../functions/api/admin/posts/repository';
 
 const slug = Astro.params.slug;
-const post = slug ? await getPublishedPostBySlug((env as never as { DB: Parameters<typeof getPublishedPostBySlug>[0] }).DB, slug) : null;
+const db = (env as never as { DB: Parameters<typeof getPublishedPostBySlug>[0] }).DB;
+const post = slug ? await getPublishedPostBySlug(db, slug) : null;
+const publishedPosts = post ? await listPublishedPosts(db) : [];
+const postIndex = post ? publishedPosts.findIndex((item) => item.slug === post.slug) : -1;
+const newerPost = postIndex > 0 ? publishedPosts[postIndex - 1] : null;
+const olderPost = postIndex >= 0 ? publishedPosts[postIndex + 1] : null;
 if (!post) Astro.response.status = 404;
 const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR', {
   year: 'numeric',
@@ -16,7 +21,14 @@ const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR
 }).replace(/\. /g, '.').replace(/\.$/, '');
 ---
 
-<BaseLayout title={post ? `${post.title} — 파랑새들의 둥지` : '글을 찾을 수 없습니다 — 파랑새들의 둥지'} description={post?.summary ?? '요청한 글을 찾을 수 없습니다.'} bodyClass="article-page">
+<BaseLayout
+  title={post ? `${post.title} — 파랑새들의 둥지` : '글을 찾을 수 없습니다 — 파랑새들의 둥지'}
+  description={post?.summary ?? '요청한 글을 찾을 수 없습니다.'}
+  canonical={post ? new URL(`/posts/${post.slug}`, Astro.url).toString() : undefined}
+  image={post?.coverImageUrl}
+  type={post ? 'article' : 'website'}
+  bodyClass="article-page"
+>
   <div class="reading-progress" aria-hidden="true"><span></span></div>
   <SiteHeader />
   <main id="top">
@@ -47,10 +59,40 @@ const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR
         </aside>
         <div class="essay-body" set:html={renderPostContent(post.contentJson!)}></div>
       </div>
+      <div class="essay-actions">
+        <button type="button" class="share-button" data-share-post data-share-title={post.title}>글 공유하기</button>
+        <span class="share-feedback" data-share-feedback aria-live="polite"></span>
+      </div>
+      <nav class="post-navigation" aria-label="인접 글">
+        {newerPost ? <a href={`/posts/${newerPost.slug}`}><span>← 더 최근 글</span><strong>{newerPost.title}</strong></a> : <span class="post-navigation-empty" />}
+        {olderPost ? <a href={`/posts/${olderPost.slug}`}><span>더 이전 글 →</span><strong>{olderPost.title}</strong></a> : <span class="post-navigation-empty" />}
+      </nav>
     </article> : <section class="essay"><header class="essay-header"><p class="essay-utility"><a class="back-link" href="/posts">← 모든 글</a></p><h1>글을 찾을 수 없습니다.</h1><p class="essay-dek">주소를 다시 확인해 주세요.</p></header></section>}
   </main>
   <SiteFooter />
 </BaseLayout>
+
+<script>
+  const shareButton = document.querySelector<HTMLButtonElement>('[data-share-post]');
+  const shareFeedback = document.querySelector<HTMLElement>('[data-share-feedback]');
+
+  shareButton?.addEventListener('click', async () => {
+    const title = shareButton.dataset.shareTitle ?? document.title;
+    const shareData = { title, url: window.location.href };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(shareData.url);
+      if (shareFeedback) shareFeedback.textContent = '글 주소를 복사했어요.';
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (shareFeedback) shareFeedback.textContent = '주소 복사에 실패했어요.';
+    }
+  });
+</script>
 
 <style>
   .essay-cover {
@@ -66,6 +108,60 @@ const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR
     width: 100%;
     max-height: 560px;
     object-fit: cover;
+  }
+
+  .essay-actions,
+  .post-navigation {
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .essay-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .share-button {
+    border: 1px solid var(--bnb-line, #d7dbe4);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 10px 16px;
+  }
+
+  .share-button:hover { background: var(--bnb-soft, #f3f4f7); }
+  .share-feedback { color: var(--bnb-muted, #687084); font-size: 0.9rem; }
+
+  .post-navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--bnb-line, #d7dbe4);
+  }
+
+  .post-navigation a {
+    display: grid;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post-navigation a:last-child { text-align: right; }
+  .post-navigation span { color: var(--bnb-muted, #687084); font-size: 0.85rem; }
+  .post-navigation strong { font-size: 1.05rem; }
+
+  @media (max-width: 744px) {
+    .essay-actions { margin-top: 32px; }
+    .post-navigation { gap: 12px; margin-top: 48px; }
+    .post-navigation strong { font-size: 0.95rem; }
   }
 
   @media (max-width: 744px) {

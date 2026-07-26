@@ -1,1 +1,16 @@
-<footer><p>© 2026</p><p>기록은 천천히 쌓입니다.</p><a href="#top">맨 위로 ↑</a></footer>
+<footer>
+  <p>© 2026</p>
+  <p>기록은 천천히 쌓입니다.</p>
+  <div class="footer-links">
+    <a href="/rss.xml">RSS 구독</a>
+    <a href="#top">맨 위로 ↑</a>
+  </div>
+</footer>
+
+<style>
+  .footer-links { display: flex; gap: 20px; }
+
+  @media (max-width: 744px) {
+    .footer-links { margin-top: 20px; }
+  }
+</style>
