@@ -35,6 +35,11 @@ const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR
           </ul>
         )}
       </header>
+      {post.coverImageUrl && (
+        <figure class="essay-cover">
+          <img src={post.coverImageUrl} alt="" />
+        </figure>
+      )}
       <div class="essay-layout">
         <aside class="essay-rail" aria-label="글 정보">
           <span>READING</span>
@@ -46,3 +51,27 @@ const publishedAt = post && new Date(post.publishedAt).toLocaleDateString('ko-KR
   </main>
   <SiteFooter />
 </BaseLayout>
+
+<style>
+  .essay-cover {
+    max-width: 860px;
+    margin: 0 auto 48px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--bnb-soft, #f3f4f7);
+  }
+
+  .essay-cover img {
+    display: block;
+    width: 100%;
+    max-height: 560px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 744px) {
+    .essay-cover {
+      margin-bottom: 32px;
+      border-radius: 14px;
+    }
+  }
+</style>
